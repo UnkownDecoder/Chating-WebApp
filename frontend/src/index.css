@@ -17,12 +17,15 @@ body {
     text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8), 0px 0px 20px rgba(255, 255, 255, 0.5);
   }
 
-  /* Custom Gradient Text for Hover */
+  
+/* Custom Gradient Text for Hover */
 .hover\:text-gradient:hover {
     background-image: linear-gradient(to right, #ff7e5f, #feb47b);
-     -webkit-background-clip: text;
-    color: transparent;
+    background-clip: text; /* Use for modern browsers */
+    -webkit-background-clip: text; /* Webkit-based browsers (Safari) */
+    color: transparent; /* Ensures text is transparent and shows the gradient */
   }
+  
   
  
   
