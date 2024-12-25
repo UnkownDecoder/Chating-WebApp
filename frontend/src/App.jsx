@@ -1,12 +1,14 @@
 import Header from "./Components/Header"
 import Body from "./Components/Body"
 import Footer from "./Components/Footer"
+
 function App() {
   
 
   return (
     <> 
      <div className="flex flex-col min-h-screen bg-gray-900">
+      
 <Header />
 <Body />
 <Footer />

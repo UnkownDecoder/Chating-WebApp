@@ -3,11 +3,14 @@ import { FaGithub, FaHackerrank, FaInstagram } from 'react-icons/fa'; // Using r
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-primary to-secondary text-white py-8 mt-auto shadow-xl">
+    <footer className="bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-8 mt-auto shadow-xl">
       <div className="max-w-7xl mx-auto text-center">
+        {/* Footer Text with Glow Effect */}
         <p className="text-lg font-semibold glow-effect mb-6">
-          &copy; 2024 Chatting-WebApp. All Rights Reserved.
+          Created By Benukar , Chirag , Kamlesh
         </p>
+
+        {/* Social Media Icons with Hover Effects */}
         <div className="flex justify-center space-x-8 mt-4">
           {/* HackerRank Icon */}
           <a
@@ -18,6 +21,7 @@ const Footer = () => {
           >
             <FaHackerrank className="transition-all duration-300 transform hover:rotate-12 hover:text-orange-500" />
           </a>
+          
           {/* GitHub Icon */}
           <a
             href="https://github.com/"
@@ -27,6 +31,7 @@ const Footer = () => {
           >
             <FaGithub className="transition-all duration-300 transform hover:rotate-12 hover:text-gray-500" />
           </a>
+
           {/* Instagram Icon */}
           <a
             href="https://www.instagram.com/"
@@ -43,4 +48,5 @@ const Footer = () => {
 };
 
 export default Footer;
+
 
