@@ -4,15 +4,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "frontend" : "cd Frontend && npm start",
-    "backend" : "cd Backend && npm start",
-    "dev" : "concurrently \"npm run frontend\" \"npm run backend\""
+    "frontend": "cd Frontend && npm start",
+    "backend": "cd Backend && npm start",
+    "dev": "concurrently \"npm run frontend\" \"npm run backend\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "concurrently": "^9.1.0"
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.9",
+    "concurrently": "^9.1.0",
+    "react-icons": "^5.4.0"
   }
 }
