@@ -1,10 +1,11 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Components/Header";
-import Body from "./Components/Body"; // Home Page
-import Login from "./pages/Login"; // Login Page
-import Register from "./pages/Register"; // Register Page
-import Footer from "./Components/Footer"; // Footer Component
+import Body from "./Components/Body";
+import Login from "./pages/Login";
+import Register from "./pages/Register"; // Import Register.jsx
+import About from "./pages/About"; // Import About.jsx
+import Footer from "./Components/Footer";
 
 const App = () => {
   return (
@@ -14,8 +15,9 @@ const App = () => {
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Body />} />
+            <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/register" element={<Register />} /> {/* Add Register Route */}
           </Routes>
         </div>
         <Footer />
@@ -25,5 +27,3 @@ const App = () => {
 };
 
 export default App;
-
-
