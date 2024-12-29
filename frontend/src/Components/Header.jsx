@@ -31,12 +31,12 @@ const Header = () => {
           >
             About
           </Link>
-          <a
-            href="#features"
+          <Link
+            to="/features"
             className="text-lg font-medium hover:text-yellow-300 transition-all duration-300 hover:scale-105"
           >
             Features
-          </a>
+          </Link>
           <Link
             to="/login"
             className={`text-lg font-medium hover:text-yellow-300 transition-all duration-300 ${

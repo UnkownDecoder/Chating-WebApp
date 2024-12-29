@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Components/Header";
 import Body from "./Components/Body";
 import Login from "./pages/Login";
-import Register from "./pages/Register"; // Import Register.jsx
-import About from "./pages/About"; // Import About.jsx
+import Register from "./pages/Register"; 
+import About from "./pages/About"; 
 import Footer from "./Components/Footer";
+import Features from "./pages/Features"; 
 
 const App = () => {
   return (
@@ -17,7 +18,8 @@ const App = () => {
             <Route path="/" element={<Body />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} /> {/* Add Register Route */}
+            <Route path="/register" element={<Register />} /> 
+            <Route path="/features" element={<Features />} /> 
           </Routes>
         </div>
         <Footer />
