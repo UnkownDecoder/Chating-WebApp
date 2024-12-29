@@ -1,25 +1,32 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ChicoImage from "../assets/images/chico.jpg";
+import DaddyImage from "../assets/images/daddy.jpg";
+import MommyImage from "../assets/images/mommy.jpg";
 
 const About = () => {
+  useEffect(() => {
+    console.log("Component mounted");
+  }, []);
+
   const reviews = [
     {
-      userPhoto: "https://via.placeholder.com/100",
-      username: "John Doe",
+      userPhoto: ChicoImage,
+      username: "Vishal",
       rating: 5,
       review: "Amazing platform! The UI is so intuitive, and I love the real-time messaging feature.",
     },
     {
-      userPhoto: "https://via.placeholder.com/100",
-      username: "Jane Smith",
+      userPhoto: DaddyImage,
+      username: "Arjun",
       rating: 4,
       review: "Great app, but I wish there were more customization options for themes.",
     },
     {
-      userPhoto: "https://via.placeholder.com/100",
-      username: "Alex Johnson",
+      userPhoto: MommyImage,
+      username: "HerMommy",
       rating: 5,
       review: "The end-to-end encryption gives me peace of mind. Highly recommend it!",
     },
@@ -64,10 +71,10 @@ const About = () => {
     <div className="flex-grow bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-24 px-6 relative">
       {/* About Section */}
       <div className="max-w-7xl mx-auto text-center">
-        <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold glow-effect mb-6 transform transition-all duration-500 ease-in-out " >
+        <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold glow-effect mb-6 transform transition-all duration-500 ease-in-out">
           About Chat-Zone
         </h1>
-        <p className="text-sm md:text-lg lg:text-2xl mb-8 opacity-80 transform transition-all duration-300 ease-in-ou ">
+        <p className="text-sm md:text-lg lg:text-2xl mb-8 opacity-80 transform transition-all duration-300 ease-in-out">
           Discover a platform where real-time communication meets simplicity and security.
         </p>
 
@@ -106,6 +113,3 @@ const About = () => {
 };
 
 export default About;
-
-
-
