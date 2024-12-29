@@ -1,4 +1,7 @@
 import React from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const About = () => {
   const reviews = [
@@ -22,6 +25,41 @@ const About = () => {
     },
   ];
 
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 1000,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: true,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+  };
+
+  function SampleNextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, display: "block", right: "10px" }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{ ...style, display: "block", left: "10px", zIndex: 1 }}
+        onClick={onClick}
+      />
+    );
+  }
+
   return (
     <div className="flex-grow bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-24 px-6 relative">
       {/* About Section */}
@@ -35,33 +73,24 @@ const About = () => {
 
         {/* Reviews Section */}
         <h2 className="text-3xl md:text-4xl font-bold mt-16 mb-8">User Reviews</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {reviews.map((review, index) => (
-            <div
-              key={index}
-              className="bg-gray-700 p-6 rounded-xl shadow-lg hover:shadow-2xl transform transition-all duration-300 hover:scale-105 flex flex-col items-center text-center"
-            >
-              {/* User Photo */}
-              <img
-                src={review.userPhoto}
-                alt={`${review.username}'s profile`}
-                className="w-20 h-20 rounded-full mb-4 border-4 border-yellow-400"
-              />
-              {/* User Info */}
-              <h3 className="text-lg font-bold mb-1">{review.username}</h3>
-              {/* Star Rating */}
-              <div className="flex justify-center items-center mb-2">
-                {Array.from({ length: review.rating }, (_, i) => (
-                  <span key={i} className="text-yellow-400 text-xl">&#9733;</span>
-                ))}
-                {Array.from({ length: 5 - review.rating }, (_, i) => (
-                  <span key={i} className="text-gray-500 text-xl">&#9733;</span>
-                ))}
+        <div className="bg-gray-700 p-6 rounded-xl shadow-lg max-w-md mx-auto">
+          <Slider {...settings}>
+            {reviews.map((review, index) => (
+              <div key={index} className="p-4">
+                <img src={review.userPhoto} alt={review.username} className="w-24 h-24 rounded-full mx-auto" />
+                <h3 className="text-xl font-bold text-center mt-4">{review.username}</h3>
+                <div className="flex justify-center items-center mb-2">
+                  {Array.from({ length: review.rating }, (_, i) => (
+                    <span key={i} className="text-yellow-400 text-xl">&#9733;</span>
+                  ))}
+                  {Array.from({ length: 5 - review.rating }, (_, i) => (
+                    <span key={i} className="text-gray-500 text-xl">&#9733;</span>
+                  ))}
+                </div>
+                <p className="text-center mt-2">{review.review}</p>
               </div>
-              {/* Review Text */}
-              <p className="text-sm opacity-80">{review.review}</p>
-            </div>
-          ))}
+            ))}
+          </Slider>
         </div>
 
         {/* Contact Us Button */}
