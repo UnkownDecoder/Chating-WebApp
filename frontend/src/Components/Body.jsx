@@ -5,7 +5,7 @@ const Body = () => {
   const navigate = useNavigate(); // Initialize navigate function
 
   return (
-    <div className="flex-grow bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-24 px-6 relative">
+    <div className="flex-grow bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-24 px-6 relative overflow-hidden flex items-center justify-center min-h-screen">
       {/* Main Hero Section */}
       <div className="max-w-7xl mx-auto text-center">
         <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold glow-effect mb-6 transform transition-all duration-500 ease-in-out hover:scale-105">
