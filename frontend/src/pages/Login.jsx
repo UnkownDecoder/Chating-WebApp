@@ -33,11 +33,33 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Form submitted:", formData);
       // Handle login logic
+
+      try {
+        const response = await fetch('http://localhost:5172/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+  
+        const result = await response.json();
+        if (response.ok) {
+          console.log('response ',result);
+          alert('Login successful');
+          navigate('/'); // Redirect to home page on success
+        } else {
+          setErrorMessage(result.message || 'Login failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        setErrorMessage('Login failed');
+      }
     }
   };
 

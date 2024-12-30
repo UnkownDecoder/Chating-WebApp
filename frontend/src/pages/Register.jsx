@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for eye toggle
+import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa"; // Icons for toggling visibility and removing images
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
-import { FaTrash } from "react-icons/fa"; // Icon for remove button
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,15 +13,13 @@ const Register = () => {
     bio: "",
   });
 
-  const [alertmessage, setAlertMessage] = useState(""); 
-  const navigate = useNavigate(); // For navigation
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false); // For password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // For confirm password visibility
-  const [profileImage, setProfileImage] = useState(null); // For uploaded profile picture
-  const [bannerImage, setBannerImage] = useState(null); // For uploaded banner image
-  const [loading, setLoading] = useState(false); // For showing loader
-  const [successMessage, setSuccessMessage] = useState(""); // For success message
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [bannerImage, setBannerImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -37,7 +33,7 @@ const Register = () => {
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (file) {
-      const fileSize = file.size / 1024 / 1024; // Size in MB
+      const fileSize = file.size / 1024 / 1024; // Convert size to MB
       const fileType = file.type.split("/")[0];
       if (fileType !== "image" || fileSize > 5) {
         alert("Please upload a valid image (max size 5MB).");
@@ -63,7 +59,6 @@ const Register = () => {
     if (!formData.password) newErrors.password = "Password is required.";
     if (formData.password.length < 8)
       newErrors.password = "Password must be at least 8 characters.";
-
     if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = "Passwords do not match.";
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required.";
@@ -75,22 +70,44 @@ const Register = () => {
     ) {
       newErrors.phone = "Enter a valid phone number.";
     }
-
     if (!formData.birthdate) newErrors.birthdate = "Please select your birthdate.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      setLoading(true); // Show loader
-      // Simulate form submission (e.g., API call)
-      setTimeout(() => {
-        setLoading(false); // Hide loader after 2 seconds
-        setSuccessMessage("Registration successful!"); // Show success message
+      setLoading(true);
+      try {
+        const formDataToSend = new FormData();
+        formDataToSend.append("bannerImage", formData.bannerImage);
+        formDataToSend.append("profileImage", formData.profileImage);
+        formDataToSend.append("username", formData.username);
+        formDataToSend.append("email", formData.email);
+        formDataToSend.append("phone", formData.phone);
+        formDataToSend.append("birthdate", formData.birthdate);
+        formDataToSend.append("bio", formData.bio);
+        formDataToSend.append("password", formData.password);
+        
 
-        // Clear form data and images
+        const response = await fetch("http://localhost:5172/api/auth/register", {
+          method: "POST",
+          body: formDataToSend,
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert("Registration successful");
+          setSuccessMessage("Registration successful!");
+        } else {
+          alert(result.message || "Registration failed");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Registration failed");
+      } finally {
+        setLoading(false);
         setFormData({
           username: "",
           email: "",
@@ -100,13 +117,12 @@ const Register = () => {
           phone: "",
           bio: "",
         });
-        setProfileImage(null); // Reset profile image
-        setBannerImage(null); // Reset banner image
-        navigate("/login"); // Redirect to login page
-        setAlertMessage("Registration successful!");
-      }, 2000); // Simulate API delay (2 seconds)
+        setProfileImage(null);
+        setBannerImage(null);
+      }
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">
