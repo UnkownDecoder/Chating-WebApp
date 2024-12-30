@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for eye toggle
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
 import { FaTrash } from "react-icons/fa"; // Icon for remove button
@@ -14,6 +15,8 @@ const Register = () => {
     bio: "",
   });
 
+  const [alertmessage, setAlertMessage] = useState(""); 
+  const navigate = useNavigate(); // For navigation
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false); // For password visibility
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); // For confirm password visibility
@@ -99,6 +102,8 @@ const Register = () => {
         });
         setProfileImage(null); // Reset profile image
         setBannerImage(null); // Reset banner image
+        navigate("/login"); // Redirect to login page
+        setAlertMessage("Registration successful!");
       }, 2000); // Simulate API delay (2 seconds)
     }
   };
