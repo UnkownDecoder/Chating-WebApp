@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for password visibility toggle
+import { useNavigate } from "react-router-dom"; // For navigation
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const Login = () => {
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false); // For toggling password visibility
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -27,8 +30,7 @@ const Login = () => {
     )
       newErrors.identifier =
         "Enter a valid email address or 10-digit phone number.";
-    if (!formData.password)
-      newErrors.password = "Password is required.";
+    if (!formData.password) newErrors.password = "Password is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -37,28 +39,26 @@ const Login = () => {
     e.preventDefault();
     if (validateForm()) {
       console.log("Form submitted:", formData);
-      // Handle login logic
-
       try {
-        const response = await fetch('http://localhost:5172/api/auth/login', {
-          method: 'POST',
+        const response = await fetch("http://localhost:5172/api/auth/login", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
         });
-  
+
         const result = await response.json();
         if (response.ok) {
-          console.log('response ',result);
-          alert('Login successful');
-          navigate('/'); // Redirect to home page on success
+          console.log("response ", result);
+          alert(`Welcome, ${result.name || "User"}!`); // Welcome alert
+          navigate("/chat"); // Redirect to Chat.jsx
         } else {
-          setErrorMessage(result.message || 'Login failed');
+          setErrorMessage(result.message || "Login failed");
         }
       } catch (error) {
-        console.error('Error:', error);
-        setErrorMessage('Login failed');
+        console.error("Error:", error);
+        setErrorMessage("Login failed");
       }
     }
   };
@@ -124,6 +124,21 @@ const Login = () => {
           </button>
         </form>
 
+        {/* Forgot Password */}
+        <div className="text-center mt-4">
+          <a
+            href="/forgot-password"
+            className="text-blue-500 hover:underline hover:text-blue-300 text-sm"
+          >
+            Forgot Password?
+          </a>
+        </div>
+
+        {/* Error Message */}
+        {errorMessage && (
+          <p className="text-red-500 text-center text-sm mt-4">{errorMessage}</p>
+        )}
+
         {/* Redirect to Register */}
         <p className="text-center text-gray-400 mt-4 text-sm">
           Haven't registered?{" "}
@@ -140,3 +155,4 @@ const Login = () => {
 };
 
 export default Login;
+
