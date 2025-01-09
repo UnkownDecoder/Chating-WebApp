@@ -6,6 +6,7 @@ const gridfs = require('gridfs-stream');
 const multer = require('multer');
 const dotenv = require('dotenv');
 const authRoutes = require('./routers/authRoutes');
+const forgetPas = require('./routers/forgetPassword');
 const reviewRouter = require('./routers/reviewRouter');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -83,6 +84,8 @@ app.get('/', (req, res) => {
 // API Routes for reviews
 app.use('/api/reviews', reviewRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/forget', forgetPas);
+
 
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err.message);
