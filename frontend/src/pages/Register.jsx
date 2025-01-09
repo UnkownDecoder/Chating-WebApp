@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa"; // Icons for toggling visibility and removing images
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
@@ -12,6 +14,10 @@ const Register = () => {
     phone: "",
     bio: "",
   });
+
+
+  const navigate = useNavigate();
+
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -100,6 +106,7 @@ const Register = () => {
         if (response.ok) {
           alert("Registration successful");
           setSuccessMessage("Registration successful!");
+          navigate('/login');
         } else {
           alert(result.message || "Registration failed");
         }
@@ -321,7 +328,7 @@ const Register = () => {
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 transform transition-all duration-300"
-              disabled={loading} // Disable button while loading
+             // Disable button while loading
             >
               {loading ? "Submitting..." : "Register"}
             </button>

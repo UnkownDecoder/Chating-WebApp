@@ -6,7 +6,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register"; 
 import About from "./pages/About"; 
 import Footer from "./Components/Footer";
-import Features from "./pages/Features"; 
+import Features from "./pages/Features";
+import ForgetPass from "./Components/ForgetPassword";
+
 
 const App = () => {
   return (
@@ -20,6 +22,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} /> 
             <Route path="/features" element={<Features />} /> 
+            <Route path="/forgot-password" element={<ForgetPass />} /> 
           </Routes>
         </div>
         <Footer />
