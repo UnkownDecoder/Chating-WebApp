@@ -1,5 +1,3 @@
-// server.js or app.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const gridfs = require('gridfs-stream');
@@ -10,10 +8,14 @@ const forgetPas = require('./routers/forgetPassword');
 const reviewRouter = require('./routers/reviewRouter');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const http = require('http');
+const socketIo = require('socket.io'); // Import socket.io
 
 dotenv.config(); // Load environment variables from .env file
 
 const app = express();
+const server = http.createServer(app); // Create an HTTP server
+const io = socketIo(server, { cors: { origin: "http://localhost:5173", credentials: true } }); // Set up socket.io with CORS
 
 const PORT = process.env.PORT || 5000;
 
@@ -31,8 +33,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Middleware
 app.use(bodyParser.json());
-
-// Middleware to parse JSON
 app.use(express.json());
 
 // GridFS setup
@@ -86,16 +86,36 @@ app.use('/api/reviews', reviewRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/forget', forgetPas);
 
+// Socket.IO setup for real-time chat
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  
+  // Listen for incoming messages from clients
+  socket.on('chat message', (msg) => {
+    console.log('Message received:', msg);
+    io.emit('chat message', msg); // Broadcast the message to all connected clients
+  });
 
+  // Listen for user typing events (optional)
+  socket.on('typing', (username) => {
+    socket.broadcast.emit('typing', username); // Notify others when someone is typing
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err.message);
   res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
+// Start the server with Socket.IO
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
 
 // Handle 404 errors
 app.use((req, res) => {
@@ -107,6 +127,15 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error);
   process.exit(1); // Exit the process in case of uncaught exception
 });
+
+// Graceful shutdown (Optional, for production)
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+});
+
 
 
 
