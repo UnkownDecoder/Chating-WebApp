@@ -7,6 +7,8 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [typing, setTyping] = useState('');
   const [friendsList, setFriendsList] = useState([]); // Dynamic friends list
+  const [filteredFriends, setFilteredFriends] = useState([]); // Filtered friends list based on search
+  const [searchQuery, setSearchQuery] = useState(''); // Search query state
   const [sidebarWidth, setSidebarWidth] = useState(250); // Default width of sidebar (in pixels)
   const minSidebarWidth = 200; // Minimum sidebar width
   const maxSidebarWidth = 400; // Maximum sidebar width
@@ -30,6 +32,7 @@ const Chat = () => {
     // Listen for updated friends list
     newSocket.on('update friends', (friends) => {
       setFriendsList(friends); // Update the friends list in real-time
+      setFilteredFriends(friends); // Initially, show all friends
     });
 
     return () => newSocket.close();
@@ -44,6 +47,17 @@ const Chat = () => {
 
   const handleTyping = () => {
     socket.emit('typing', 'User'); // Emit typing event
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    // Filter friends list based on the search query
+    const filtered = friendsList.filter((friend) =>
+      friend.toLowerCase().includes(query)
+    );
+    setFilteredFriends(filtered); // Update filtered list
   };
 
   const handleMouseDown = (e) => {
@@ -82,15 +96,26 @@ const Chat = () => {
   return (
     <div className="flex h-screen bg-gray-100">
 
-      {/* Left Sidebar (Friend List) */}
+      {/* Left Sidebar (Friend List with Search) */}
       <div
         ref={sidebarRef}
         style={{ width: `${sidebarWidth}px` }}
         className="bg-gray-800 text-white p-4"
       >
         <h2 className="text-xl font-semibold mb-4">Friends</h2>
+        
+        {/* Search Input */}
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Search friends"
+        />
+
+        {/* Friends List */}
         <ul className="space-y-2">
-          {friendsList.map((friend, index) => (
+          {filteredFriends.map((friend, index) => (
             <li key={index} className="p-2 bg-gray-700 rounded hover:bg-gray-600 cursor-pointer">
               {friend}
             </li>
@@ -152,6 +177,7 @@ const Chat = () => {
 };
 
 export default Chat;
+
 
 
 
