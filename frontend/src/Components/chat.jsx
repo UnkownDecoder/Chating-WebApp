@@ -6,10 +6,9 @@ const Chat = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [typing, setTyping] = useState('');
-  const [friendsList, setFriendsList] = useState([]); // Dynamic friends list
-  const [filteredFriends, setFilteredFriends] = useState([]); // Filtered friends list based on search
   const [searchQuery, setSearchQuery] = useState(''); // Search query state
   const [sidebarWidth, setSidebarWidth] = useState(250); // Default width of sidebar (in pixels)
+  const [showPopup, setShowPopup] = useState(false); // State for popup modal
   const minSidebarWidth = 200; // Minimum sidebar width
   const maxSidebarWidth = 400; // Maximum sidebar width
 
@@ -29,12 +28,6 @@ const Chat = () => {
       setTyping(`${username} is typing...`);
     });
 
-    // Listen for updated friends list
-    newSocket.on('update friends', (friends) => {
-      setFriendsList(friends); // Update the friends list in real-time
-      setFilteredFriends(friends); // Initially, show all friends
-    });
-
     return () => newSocket.close();
   }, []);
 
@@ -50,14 +43,7 @@ const Chat = () => {
   };
 
   const handleSearchChange = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    // Filter friends list based on the search query
-    const filtered = friendsList.filter((friend) =>
-      friend.toLowerCase().includes(query)
-    );
-    setFilteredFriends(filtered); // Update filtered list
+    setSearchQuery(e.target.value); // Update search query state
   };
 
   const handleMouseDown = (e) => {
@@ -96,31 +82,29 @@ const Chat = () => {
   return (
     <div className="flex h-screen bg-gray-100">
 
-      {/* Left Sidebar (Friend List with Search) */}
+      {/* Left Sidebar (Search Bar for Friends) */}
       <div
         ref={sidebarRef}
         style={{ width: `${sidebarWidth}px` }}
         className="bg-gray-800 text-white p-4"
       >
-        <h2 className="text-xl font-semibold mb-4">Friends</h2>
-        
         {/* Search Input */}
         <input
           type="text"
           value={searchQuery}
-          onChange={handleSearchChange}
+          onClick={() => setShowPopup(true)} // Open popup modal on click
           className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Search friends"
+          placeholder="Find or Start Conversation"
+          readOnly // Prevent typing into the search input
         />
 
-        {/* Friends List */}
-        <ul className="space-y-2">
-          {filteredFriends.map((friend, index) => (
-            <li key={index} className="p-2 bg-gray-700 rounded hover:bg-gray-600 cursor-pointer">
-              {friend}
-            </li>
-          ))}
-        </ul>
+        {/* Friends Button */}
+        <button
+          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onClick={() => console.log('Friends button clicked!')}
+        >
+          Friends
+        </button>
       </div>
 
       {/* Divider for resizing */}
@@ -172,15 +156,40 @@ const Chat = () => {
         </div>
       </div>
 
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h3 className="text-xl font-semibold mb-4">Start a Conversation</h3>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter username or ID"
+            />
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setShowPopup(false)} // Close modal
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { console.log(`Searching for: ${searchQuery}`); setShowPopup(false); }}
+                className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
+              >
+                Start
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Chat;
-
-
-
-
 
 
 
