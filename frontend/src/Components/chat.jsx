@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
+import muteSound from '/sounds/mute.mp3';
+import unmuteSound from '/sounds/unmute.mp3';
 
 const Chat = (userId) => {
   const [socket, setSocket] = useState(null);
@@ -11,13 +13,16 @@ const Chat = (userId) => {
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [showPopup, setShowPopup] = useState(false);
   const [user, setUser] = useState({
-    username: '', // Default value before login
-    photo: '', // Default image URL before login
+    username: 'Guest', // Default value before login
+    photo: 'https://via.placeholder.com/40', // Default image URL before login
   });
 
-  // Mute and Deafen states
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);  // Added state to toggle friends view
+  const [showAddFriendMessage, setShowAddFriendMessage] = useState(false);  // State to show message for adding friend
+
+  const [friendRequestMessage, setFriendRequestMessage] = useState(''); // State for friend request message
 
   const minSidebarWidth = 200;
   const maxSidebarWidth = 400;
@@ -35,10 +40,9 @@ const Chat = (userId) => {
       setTyping(`${username} is typing...`);
     });
 
-    // Fetch the user profile from your backend after login
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`http://localhost:5172/api/user/chat/${userId}`); 
+        const response = await fetch('/api/user'); // Example endpoint
         const data = await response.json();
         setUser({
           username: data.username,
@@ -52,7 +56,7 @@ const Chat = (userId) => {
     fetchUserProfile();
 
     return () => newSocket.close();
-  }, [userId]);
+  }, []);
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -65,46 +69,29 @@ const Chat = (userId) => {
     socket.emit('typing', user.username);
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = sidebarWidth;
-
-    const handleMouseMove = (moveEvent) => {
-      const diff = moveEvent.clientX - startX;
-      let newWidth = startWidth + diff;
-      if (newWidth < minSidebarWidth) newWidth = minSidebarWidth;
-      if (newWidth > maxSidebarWidth) newWidth = maxSidebarWidth;
-
-      setSidebarWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   const toggleMute = () => {
     setIsMuted(!isMuted);
+    !isMuted ? muteAudio.play() : unmuteAudio.play();
   };
 
   const toggleDeafen = () => {
     setIsDeafened(!isDeafened);
+    !isDeafened ? muteAudio.play() : unmuteAudio.play();
+  };
+
+  const toggleFriendsView = () => {
+    setShowFriends(!showFriends); // Toggle friends view
+    setShowAddFriendMessage(false); // Hide the "Add Friend" message when toggling the friends view
+  };
+
+  const handleAddFriendClick = () => {
+    setShowAddFriendMessage(true); // Show the message below "Add Friend" button when clicked
+  };
+
+  const handleFriendRequestSend = () => {
+    // Handle sending friend request logic here
+    console.log('Sending friend request:', friendRequestMessage);
+    setFriendRequestMessage(''); // Clear the message after sending
   };
 
   return (
@@ -118,7 +105,7 @@ const Chat = (userId) => {
           type="text"
           value={searchQuery}
           onClick={() => setShowPopup(true)}
-          onChange={handleSearchChange}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Find or Start Conversation"
           style={{ height: '35px', fontSize: '14px' }}
@@ -126,7 +113,7 @@ const Chat = (userId) => {
 
         <button
           className="w-full py-2 mb-4 bg-transparent text-left text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onClick={() => console.log('Friends button clicked!')}
+          onClick={toggleFriendsView} // Toggle friends view on button click
           style={{ transition: 'background-color 0.3s ease' }}
         >
           Friends
@@ -144,100 +131,100 @@ const Chat = (userId) => {
               <button className="text-white hover:text-gray-400" onClick={toggleMute}>
                 {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
               </button>
-              <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 text-xs text-white opacity-0 group-hover:opacity-100">
-                {isMuted ? 'Unmute Yourself' : 'Mute Yourself'}
-              </span>
             </div>
             <div className="relative group">
               <button className="text-white hover:text-gray-400" onClick={toggleDeafen}>
                 {isDeafened ? <FaVolumeMute /> : <FaVolumeUp />}
               </button>
-              <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 text-xs text-white opacity-0 group-hover:opacity-100">
-                {isDeafened ? 'Undeafen Yourself' : 'Deafen Yourself'}
-              </span>
             </div>
             <div className="relative group">
               <button className="text-white hover:text-gray-400">
                 <FaCog />
               </button>
-              <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 text-xs text-white opacity-0 group-hover:opacity-100">
-                User Settings
-              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div
-        onMouseDown={handleMouseDown}
-        className="cursor-ew-resize bg-gray-600 w-1"
-      />
-
+      {/* Right Section */}
       <div className="flex-grow flex flex-col bg-white">
-        <header className="bg-blue-600 text-white p-4 text-center text-xl">
-          Chat Room
-        </header>
-
-        <div className="flex-grow p-4 overflow-y-auto">
-          <div className="space-y-4">
-            {messages.map((msg, index) => (
-              <div key={index} className="p-2 bg-gray-200 rounded-lg">
-                {msg}
-              </div>
-            ))}
+        {/* Friends Navbar (moved to top) */}
+        {showFriends && (
+          <div className="flex justify-start items-center p-4 bg-gray-200 space-x-4">
+            <span className="font-semibold text-xl mr-4">Friends</span>
+            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">Online</button>
+            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">All</button>
+            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">Pending</button>
+            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">Blocked</button>
+            <button
+              className="p-2  bg-green-500 hover:bg-green-600 text-white rounded-lg"
+              onClick={handleAddFriendClick} // Handle Add Friend click
+            >
+              Add Friend
+            </button>
           </div>
-        </div>
+        )}
 
-        <div className="p-2 text-gray-500 italic">
-          {typing}
-        </div>
-
-        <div className="p-4 bg-gray-200 flex items-center">
-          <textarea
-            value={message}
-            onChange={(e) => { setMessage(e.target.value); handleTyping(); }}
-            onKeyDown={handleKeyPress}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            placeholder="Type a message"
-            rows={3}
-          />
-          <button
-            onClick={handleSendMessage}
-            className="ml-2 bg-blue-600 text-white p-2 rounded-lg"
-          >
-            Send
-          </button>
-        </div>
-      </div>
-
-      {showPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-xl font-semibold mb-4">Start a Conversation</h3>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter username or ID"
+        {/* Add Friend Message and Friend Request Input */}
+        {showAddFriendMessage && (
+          <div className="p-4">
+            <h2 className="text-2xl font-semibold mb-2">Add Friend</h2>
+            <p className="text-sm text-gray-500 mb-4">You can add friends with their username or their unique ID number</p>
+            <textarea
+              value={friendRequestMessage}
+              onChange={(e) => setFriendRequestMessage(e.target.value)}
+              placeholder="You can add friends with their username or their unique ID number"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-2"
+              rows={1}
             />
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setShowPopup(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => { console.log(`Searching for: ${searchQuery}`); setShowPopup(false); }}
-                className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
-              >
-                Start
-              </button>
-            </div>
+            <button
+              onClick={handleFriendRequestSend}
+              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+            >
+              Send Friend Request
+            </button>
           </div>
+        )}
+
+        {/* Chat Room or Friends View Content */}
+        <div className="flex-grow p-4 overflow-y-auto">
+          {!showFriends ? (
+            <div className="space-y-4">
+              {messages.map((msg, index) => (
+                <div key={index} className="p-2 bg-gray-200 rounded-lg">
+                  {msg}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Additional friends content goes here */}
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Typing Indicator */}
+        {!showFriends && <div className="p-2 text-gray-500 italic">{typing}</div>}
+
+        {/* Message Input */}
+        {!showFriends && (
+          <div className="p-4 bg-gray-200 flex items-center">
+            <textarea
+              value={message}
+              onChange={(e) => { setMessage(e.target.value); handleTyping(); }}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="Type a message"
+              rows={1}
+            />
+            <button
+              onClick={handleSendMessage}
+              className="ml-2 bg-blue-600 text-white p-2 rounded-lg"
+            >
+              Send
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
