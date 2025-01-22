@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
 
-const Chat = () => {
+const Chat = (userId) => {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -11,8 +11,8 @@ const Chat = () => {
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [showPopup, setShowPopup] = useState(false);
   const [user, setUser] = useState({
-    username: 'Guest', // Default value before login
-    photo: 'https://via.placeholder.com/40', // Default image URL before login
+    username: '', // Default value before login
+    photo: '', // Default image URL before login
   });
 
   // Mute and Deafen states
@@ -24,7 +24,7 @@ const Chat = () => {
   const sidebarRef = useRef(null);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io('http://localhost:5172');
     setSocket(newSocket);
 
     newSocket.on('chat message', (msg) => {
@@ -38,7 +38,7 @@ const Chat = () => {
     // Fetch the user profile from your backend after login
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch('/api/user'); // Example endpoint
+        const response = await fetch(`http://localhost:5172/api/user/chat/${userId}`); 
         const data = await response.json();
         setUser({
           username: data.username,
@@ -52,7 +52,7 @@ const Chat = () => {
     fetchUserProfile();
 
     return () => newSocket.close();
-  }, []);
+  }, [userId]);
 
   const handleSendMessage = () => {
     if (message.trim()) {

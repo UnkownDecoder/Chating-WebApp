@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routers/authRoutes');
 const forgetPas = require('./routers/forgetPassword');
 const reviewRouter = require('./routers/reviewRouter');
+const userInfo = require('./routers/authUser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const http = require('http');
@@ -85,6 +86,7 @@ app.get('/', (req, res) => {
 app.use('/api/reviews', reviewRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/forget', forgetPas);
+app.use('/api/user', userInfo);
 
 // Socket.IO setup for real-time chat
 io.on('connection', (socket) => {
@@ -127,6 +129,8 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error);
   process.exit(1); // Exit the process in case of uncaught exception
 });
+
+
 
 // Graceful shutdown (Optional, for production)
 process.on('SIGTERM', () => {

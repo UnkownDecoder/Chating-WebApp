@@ -8,7 +8,7 @@ import About from "./pages/About";
 import Footer from "./Components/Footer";
 import Features from "./pages/Features";
 import ForgetPass from "./Components/ForgetPassword";
-import Chat from "./Components/Chat"; // Chat component import
+import Chat from "./Components/chat"; // Chat component import
 
 const App = () => {
   return (
