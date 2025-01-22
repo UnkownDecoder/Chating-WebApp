@@ -1,65 +1,86 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
+import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
 
 const Chat = () => {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [typing, setTyping] = useState('');
-  const [searchQuery, setSearchQuery] = useState(''); // Search query state
-  const [sidebarWidth, setSidebarWidth] = useState(250); // Default width of sidebar (in pixels)
-  const [showPopup, setShowPopup] = useState(false); // State for popup modal
-  const minSidebarWidth = 200; // Minimum sidebar width
-  const maxSidebarWidth = 400; // Maximum sidebar width
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarWidth, setSidebarWidth] = useState(250);
+  const [showPopup, setShowPopup] = useState(false);
+  const [user, setUser] = useState({
+    username: 'Guest', // Default value before login
+    photo: 'https://via.placeholder.com/40', // Default image URL before login
+  });
 
+  // Mute and Deafen states
+  const [isMuted, setIsMuted] = useState(false);
+  const [isDeafened, setIsDeafened] = useState(false);
+
+  const minSidebarWidth = 200;
+  const maxSidebarWidth = 400;
   const sidebarRef = useRef(null);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000'); // Your backend server URL
+    const newSocket = io('http://localhost:5000');
     setSocket(newSocket);
 
-    // Listen for chat messages
     newSocket.on('chat message', (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
     });
 
-    // Listen for typing indicator
     newSocket.on('typing', (username) => {
       setTyping(`${username} is typing...`);
     });
+
+    // Fetch the user profile from your backend after login
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch('/api/user'); // Example endpoint
+        const data = await response.json();
+        setUser({
+          username: data.username,
+          photo: data.photo,
+        });
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
 
     return () => newSocket.close();
   }, []);
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      socket.emit('chat message', message); // Send message to server
+      socket.emit('chat message', message);
       setMessage('');
     }
   };
 
   const handleTyping = () => {
-    socket.emit('typing', 'User'); // Emit typing event
+    socket.emit('typing', user.username);
   };
 
   const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value); // Update search query state
+    setSearchQuery(e.target.value);
   };
 
   const handleMouseDown = (e) => {
     e.preventDefault();
-
     const startX = e.clientX;
     const startWidth = sidebarWidth;
 
     const handleMouseMove = (moveEvent) => {
       const diff = moveEvent.clientX - startX;
       let newWidth = startWidth + diff;
-      // Restrict the sidebar width between min and max
       if (newWidth < minSidebarWidth) newWidth = minSidebarWidth;
       if (newWidth > maxSidebarWidth) newWidth = maxSidebarWidth;
 
-      setSidebarWidth(newWidth); // Update the width of the sidebar
+      setSidebarWidth(newWidth);
     };
 
     const handleMouseUp = () => {
@@ -73,55 +94,90 @@ const Chat = () => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      // Send message on Enter (without Shift)
       e.preventDefault();
       handleSendMessage();
     }
   };
 
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
+  const toggleDeafen = () => {
+    setIsDeafened(!isDeafened);
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
-
-      {/* Left Sidebar (Search Bar for Friends) */}
       <div
         ref={sidebarRef}
         style={{ width: `${sidebarWidth}px` }}
-        className="bg-gray-800 text-white p-4"
+        className="bg-gray-800 text-white p-4 flex flex-col justify-between"
       >
-        {/* Search Input */}
         <input
           type="text"
           value={searchQuery}
-          onClick={() => setShowPopup(true)} // Open popup modal on click
+          onClick={() => setShowPopup(true)}
+          onChange={handleSearchChange}
           className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Find or Start Conversation"
-          readOnly // Prevent typing into the search input
+          style={{ height: '35px', fontSize: '14px' }}
         />
 
-        {/* Friends Button */}
         <button
-          className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full py-2 mb-4 bg-transparent text-left text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
           onClick={() => console.log('Friends button clicked!')}
+          style={{ transition: 'background-color 0.3s ease' }}
         >
           Friends
         </button>
+
+        <div className="mt-auto flex items-center mb-4">
+          <img
+            src={user.photo}
+            alt="User"
+            className="rounded-full w-10 h-10 mr-3"
+          />
+          <span className="text-white font-semibold">{user.username}</span>
+          <div className="ml-auto flex space-x-4">
+            <div className="relative group">
+              <button className="text-white hover:text-gray-400" onClick={toggleMute}>
+                {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
+              </button>
+              <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 text-xs text-white opacity-0 group-hover:opacity-100">
+                {isMuted ? 'Unmute Yourself' : 'Mute Yourself'}
+              </span>
+            </div>
+            <div className="relative group">
+              <button className="text-white hover:text-gray-400" onClick={toggleDeafen}>
+                {isDeafened ? <FaVolumeMute /> : <FaVolumeUp />}
+              </button>
+              <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 text-xs text-white opacity-0 group-hover:opacity-100">
+                {isDeafened ? 'Undeafen Yourself' : 'Deafen Yourself'}
+              </span>
+            </div>
+            <div className="relative group">
+              <button className="text-white hover:text-gray-400">
+                <FaCog />
+              </button>
+              <span className="absolute left-1/2 transform -translate-x-1/2 bottom-8 text-xs text-white opacity-0 group-hover:opacity-100">
+                User Settings
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Divider for resizing */}
       <div
         onMouseDown={handleMouseDown}
         className="cursor-ew-resize bg-gray-600 w-1"
       />
 
-      {/* Right Chatting Section */}
       <div className="flex-grow flex flex-col bg-white">
-
-        {/* Chat Header */}
         <header className="bg-blue-600 text-white p-4 text-center text-xl">
           Chat Room
         </header>
 
-        {/* Chat Messages */}
         <div className="flex-grow p-4 overflow-y-auto">
           <div className="space-y-4">
             {messages.map((msg, index) => (
@@ -132,12 +188,10 @@ const Chat = () => {
           </div>
         </div>
 
-        {/* Typing Indicator */}
         <div className="p-2 text-gray-500 italic">
           {typing}
         </div>
 
-        {/* Message Input */}
         <div className="p-4 bg-gray-200 flex items-center">
           <textarea
             value={message}
@@ -156,7 +210,6 @@ const Chat = () => {
         </div>
       </div>
 
-      {/* Popup Modal */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
@@ -170,7 +223,7 @@ const Chat = () => {
             />
             <div className="mt-4 flex justify-end">
               <button
-                onClick={() => setShowPopup(false)} // Close modal
+                onClick={() => setShowPopup(false)}
                 className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-400"
               >
                 Cancel
@@ -190,6 +243,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
-
-

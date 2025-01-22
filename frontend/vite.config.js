@@ -6,10 +6,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     fs: {
-      // Explicitly allow the project directory
-      allow: [path.resolve(__dirname, '')],
+      // Allow node_modules and public fonts directory
+      allow: [
+        path.resolve(__dirname, ''),
+        path.resolve(__dirname, 'node_modules'),
+      ],
     },
   },
 });
+
 
 
