@@ -4,7 +4,7 @@ import Header from "./Components/Header";
 import Body from "./Components/Body";
 import Login from "./pages/Login";
 import Register from "./pages/Register"; 
-import About from "./pages/About"; 
+import Reviews from "./pages/Reviews"; 
 import Footer from "./Components/Footer";
 import Features from "./pages/Features";
 import ForgetPass from "./Components/ForgetPassword";
@@ -32,7 +32,7 @@ const AppLayout = () => {
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Body />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/Reviews" element={<Reviews />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/features" element={<Features />} />

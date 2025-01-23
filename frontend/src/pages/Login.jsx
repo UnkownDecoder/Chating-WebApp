@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for password visibility toggle
 import { useNavigate } from "react-router-dom"; // For navigation
+import './Login.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false); // For toggling password visibility
   const [errorMessage, setErrorMessage] = useState("");
+  const [showMessage, setShowMessage] = useState(false); // For controlling message visibility
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -51,14 +53,22 @@ const Login = () => {
         const result = await response.json();
         if (response.ok) {
           console.log("response ", result);
-          alert(`Welcome, ${result.name || "User"}!`); // Welcome alert
-          navigate("/chat"); // Redirect to Chat.jsx
+          setErrorMessage(`Welcome, ${result.name || "User"}!`);
+          setShowMessage(true);
+          setTimeout(() => {
+            setShowMessage(false);
+            navigate("/chat"); // Redirect to Chat.jsx
+          }, 3000); // Show message for 3 seconds
         } else {
           setErrorMessage(result.message || "Login failed");
+          setShowMessage(true);
+          setTimeout(() => setShowMessage(false), 3000); // Show message for 3 seconds
         }
       } catch (error) {
         console.error("Error:", error);
         setErrorMessage("Login failed");
+        setShowMessage(true);
+        setTimeout(() => setShowMessage(false), 3000); // Show message for 3 seconds
       }
     }
   };
@@ -135,8 +145,10 @@ const Login = () => {
         </div>
 
         {/* Error Message */}
-        {errorMessage && (
-          <p className="text-red-500 text-center text-sm mt-4">{errorMessage}</p>
+        {showMessage && (
+          <div className="dropdown-message">
+            {errorMessage}
+          </div>
         )}
 
         {/* Redirect to Register */}
@@ -155,4 +167,3 @@ const Login = () => {
 };
 
 export default Login;
-
