@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for password visibility toggle
 import { useNavigate } from "react-router-dom"; // For navigation
-import './Login.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
