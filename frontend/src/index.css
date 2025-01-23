@@ -68,9 +68,7 @@ body {
        url('/fonts/slick.ttf') format('truetype');
 }
 
-  
-  
-  
- 
-  
- 
+@font-face {
+  font-family: RacingSportDisplay-Regular;
+  src: url('../src/fonts/RacingSportDisplay-Regular.otf') format('truetype'),
+}
