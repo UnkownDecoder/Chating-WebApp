@@ -17,30 +17,30 @@ const Header = () => {
         <nav className="hidden md:flex space-x-8">
           <Link
             to="/"
-            className={`text-lg font-medium hover:text-yellow-300 transition-all duration-300 ${
-              location.pathname === "/" ? "text-yellow-300" : "hover:scale-105"
+            className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
+              location.pathname === "/" ? "text-blue-300" : "hover:scale-105"
             }`}
           >
             Home
           </Link>
           <Link
-            to="/about"
-            className={`text-lg font-medium hover:text-yellow-300 transition-all duration-300 ${
-              location.pathname === "/about" ? "text-yellow-300" : "hover:scale-105"
+            to="/Reviews"
+            className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
+              location.pathname === "/Reviews" ? "text-blue-300" : "hover:scale-105"
             }`}
           >
-            About
+            Reviews
           </Link>
           <Link
             to="/features"
-            className="text-lg font-medium hover:text-yellow-300 transition-all duration-300 hover:scale-105"
+            className="text-lg font-medium hover:text-blue-300 transition-all duration-300 hover:scale-105"
           >
             Features
           </Link>
           <Link
             to="/login"
-            className={`text-lg font-medium hover:text-yellow-300 transition-all duration-300 ${
-              location.pathname === "/login" ? "text-yellow-300" : "hover:scale-105"
+            className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
+              location.pathname === "/login" ? "text-blue-300" : "hover:scale-105"
             }`}
           >
             Login
@@ -81,8 +81,8 @@ const Header = () => {
               <Link
                 to="/"
                 onClick={() => setIsMenuOpen(false)}
-                className={`block text-lg font-medium hover:text-yellow-300 ${
-                  location.pathname === "/" ? "text-yellow-300" : ""
+                className={`block text-lg font-medium hover:text-blue-300 ${
+                  location.pathname === "/" ? "text-blue-300" : ""
                 }`}
               >
                 Home
@@ -90,20 +90,20 @@ const Header = () => {
             </li>
             <li>
               <Link
-                to="/about"
+                to="/Reviews"
                 onClick={() => setIsMenuOpen(false)}
-                className={`block text-lg font-medium hover:text-yellow-300 ${
-                  location.pathname === "/about" ? "text-yellow-300" : ""
+                className={`block text-lg font-medium hover:text-blue-300 ${
+                  location.pathname === "/Reviews" ? "text-blue-300" : ""
                 }`}
               >
-                About
+                Reviews
               </Link>
             </li>
             <li>
               <a
                 href="#features"
                 onClick={() => setIsMenuOpen(false)}
-                className="block text-lg font-medium hover:text-yellow-300"
+                className="block text-lg font-medium hover:text-blue-300"
               >
                 Features
               </a>
@@ -112,8 +112,8 @@ const Header = () => {
               <Link
                 to="/login"
                 onClick={() => setIsMenuOpen(false)}
-                className={`block text-lg font-medium hover:text-yellow-300 ${
-                  location.pathname === "/login" ? "text-yellow-300" : ""
+                className={`block text-lg font-medium hover:text-blue-300 ${
+                  location.pathname === "/login" ? "text-blue-300" : ""
                 }`}
               >
                 Login

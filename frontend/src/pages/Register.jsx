@@ -275,7 +275,7 @@ const Register = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 rows="4"
-                placeholder="Write something about yourself..."
+                placeholder="Write something Reviews yourself..."
                 maxLength="300"
               ></textarea>
             </div>
