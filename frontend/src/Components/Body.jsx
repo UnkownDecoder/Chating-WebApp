@@ -16,7 +16,7 @@ const Body = () => {
         </p>
         <button
           onClick={() => navigate('/register')} // Navigate to Register page
-          className="px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold rounded-full shadow-xl transform transition duration-500 hover:bg-yellow-300 hover:scale-110"
+          className="px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-blue-400 to-purple-500 text-black font-bold rounded-full shadow-xl transform transition duration-500 hover:bg-blue-300 hover:scale-110"
         >
           Start Chatting Now
         </button>

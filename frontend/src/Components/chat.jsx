@@ -13,8 +13,8 @@ const Chat = (userId) => {
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [showPopup, setShowPopup] = useState(false);
   const [user, setUser] = useState({
-    username: 'Guest', // Default value before login
-    photo: 'https://via.placeholder.com/40', // Default image URL before login
+    username: '', // Default value before login
+    photo: '', // Default image URL before login
   });
 
   const [isMuted, setIsMuted] = useState(false);

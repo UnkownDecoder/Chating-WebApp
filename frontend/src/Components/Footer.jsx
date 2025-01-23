@@ -19,7 +19,7 @@ const Footer = () => {
             rel="noopener noreferrer"
             className="text-3xl hover:text-gradient transition duration-300 transform hover:scale-125"
           >
-            <FaHackerrank className="transition-all duration-300 transform hover:rotate-12 hover:text-orange-500" />
+            <FaHackerrank className="transition-all duration-300 transform hover:rotate-12 hover:text-purple-500" />
           </a>
           
           {/* GitHub Icon */}
