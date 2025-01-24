@@ -48,11 +48,18 @@ conn.once('open', () => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// API endpoint to upload images
+// Image Upload Route
 app.post('/upload', upload.fields([{ name: 'bannerImage' }, { name: 'profileImage' }]), (req, res) => {
+  // Log the files received
+  console.log('Uploaded Files:', req.files); // Check if files are received properly
+
   const files = req.files;
-  const bannerImage = files.bannerImage ? files.bannerImage[0] : null;
-  const profileImage = files.profileImage ? files.profileImage[0] : null;
+  const bannerImage = files && files.bannerImage ? files.bannerImage[0] : null;
+  const profileImage = files && files.profileImage ? files.profileImage[0] : null;
+
+  // Log if bannerImage or profileImage is null
+  console.log('Banner Image:', bannerImage);
+  console.log('Profile Image:', profileImage);
 
   const uploadImage = (file) => {
     return new Promise((resolve, reject) => {
@@ -62,17 +69,33 @@ app.post('/upload', upload.fields([{ name: 'bannerImage' }, { name: 'profileImag
       });
       writeStream.write(file.buffer);
       writeStream.end();
-      writeStream.on('finish', () => resolve(writeStream.id));
-      writeStream.on('error', reject);
+
+      // Log when the file upload finishes
+      writeStream.on('finish', () => {
+        console.log('File uploaded successfully with ID:', writeStream.id); // Log the uploaded file ID
+        resolve(writeStream.id);
+      });
+
+      // Log error if any
+      writeStream.on('error', (err) => {
+        console.error('Error in uploading file:', err); // Log any errors in the upload process
+        reject(err);
+      });
     });
   };
 
-  Promise.all([bannerImage ? uploadImage(bannerImage) : null, profileImage ? uploadImage(profileImage) : null])
+  // Start uploading both banner and profile images if available
+  Promise.all([
+    bannerImage ? uploadImage(bannerImage) : null,
+    profileImage ? uploadImage(profileImage) : null
+  ])
     .then(([bannerImageId, profileImageId]) => {
+      console.log('Banner Image ID:', bannerImageId); // Log the returned banner image ID
+      console.log('Profile Image ID:', profileImageId); // Log the returned profile image ID
       res.json({ bannerImageId, profileImageId });
     })
-    .catch(err => {
-      console.error('Error uploading images:', err);
+    .catch((err) => {
+      console.error('Error uploading images:', err); // Catch and log any error during the upload
       res.status(500).json({ message: 'Error uploading images' });
     });
 });
@@ -130,8 +153,6 @@ process.on('uncaughtException', (error) => {
   process.exit(1); // Exit the process in case of uncaught exception
 });
 
-
-
 // Graceful shutdown (Optional, for production)
 process.on('SIGTERM', () => {
   console.log('SIGTERM received: closing HTTP server');
@@ -139,8 +160,3 @@ process.on('SIGTERM', () => {
     console.log('HTTP server closed');
   });
 });
-
-
-
-
-

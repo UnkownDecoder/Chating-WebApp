@@ -7,15 +7,9 @@ const mongoose = require('mongoose');
 const { GridFSBucket } = require('mongodb');
 require('dotenv').config();
 
-
-
-
-
-// Sign Up
-const conn = mongoose.connection;
-let gfsBucket;
-
 // Initialize GridFSBucket when MongoDB connection is open
+let gfsBucket;
+const conn = mongoose.connection;
 conn.once('open', () => {
   gfsBucket = new GridFSBucket(conn.db, { bucketName: 'uploads' });
 });
@@ -39,6 +33,9 @@ const signUp = async (req, res) => {
     const { username, email, phone, birthdate, bio, password } = req.body;
     const files = req.files;
 
+    // Debugging: Check if files are coming through properly
+    console.log('Files received:', files);
+
     if (!username || !email || !phone || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -61,6 +58,10 @@ const signUp = async (req, res) => {
       profileImage ? uploadFileToGridFS(profileImage) : null,
     ]);
 
+    // Debugging: Check if IDs are generated for images
+    console.log('Banner Image ID:', bannerImageId);
+    console.log('Profile Image ID:', profileImageId);
+
     // Create a new user
     const newUser = new User({
       username,
@@ -69,8 +70,8 @@ const signUp = async (req, res) => {
       birthdate,
       bio,
       password: hashedPassword,
-      bannerImage: bannerImageId,
-      profileImage: profileImageId,
+      bannerImage: bannerImageId || null,
+      profileImage: profileImageId || null,
     });
 
     const userCreated = await newUser.save();
@@ -82,53 +83,51 @@ const signUp = async (req, res) => {
   }
 };
 
-
-
 // Sign In
 const signIn = async (req, res) => {
-    try {
-        const { identifier, password } = req.body;
-    
-        // Validate input
-        if (!identifier || !password) {
-          return res.status(400).json({ message: 'All fields are required.' });
-        }
-    
-        // Find user by email or phone
-        const user = await User.findOne({
-          $or: [
-            { email: identifier },
-            { phone: identifier },
-          ],
-        });
-    
-        if (!user) {
-          return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
-        }
-    
-        // Compare password
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-          return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
-        }
-    
-        // Simulate generating a token (replace with real JWT in production)
-        const token = `fake-jwt-token-for-${user._id}`;
-    
-        res.status(200).json({
-          message: 'Login successful.',
-          user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            phone: user.phone,
-          },
-          token,
-        });
-      } catch (error) {
-        console.error('Error during login:', error);
-        res.status(500).json({ message: 'Server error.', error: error.message });
-      }
+  try {
+    const { identifier, password } = req.body;
+
+    // Validate input
+    if (!identifier || !password) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    // Find user by email or phone
+    const user = await User.findOne({
+      $or: [
+        { email: identifier },
+        { phone: identifier },
+      ],
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
+    }
+
+    // Compare password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
+    }
+
+    // Simulate generating a token (replace with real JWT in production)
+    const token = `fake-jwt-token-for-${user._id}`;
+
+    res.status(200).json({
+      message: 'Login successful.',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
 };
 
 module.exports = { signIn, signUp };

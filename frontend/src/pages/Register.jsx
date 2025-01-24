@@ -84,8 +84,8 @@ const Register = () => {
       setLoading(true);
       try {
         const formDataToSend = new FormData();
-        formDataToSend.append("bannerImage", formData.bannerImage);
-        formDataToSend.append("profileImage", formData.profileImage);
+        if (profileImage) formDataToSend.append("profileImage", profileImage);
+        if (bannerImage) formDataToSend.append("bannerImage", bannerImage);
         formDataToSend.append("username", formData.username);
         formDataToSend.append("email", formData.email);
         formDataToSend.append("phone", formData.phone);
@@ -343,7 +343,7 @@ const Register = () => {
         </div>
 
         {/* Right Section: Preview */}
-        <div className="w-[300px] h-[340.85px] bg-gray-800 text-white rounded-lg shadow-lg ">
+        <div className="w-[300px] h-[340.85px] bg-gray-800 text-white rounded-lg shadow-lg">
           <div className="relative flex flex-col items-center space-y-4">
             {/* Header Div with Banner Image */}
             <div className="w-[300px] h-[150px] bg-gray-700 rounded-lg">
@@ -378,8 +378,8 @@ const Register = () => {
               <div className="w-[268px] h-[24px] bg-transparent rounded-lg mb-4 flex items-center justify-start">
                 <h3 className="text-xl font-semibold">{formData.username || "Username"}</h3>
               </div>
-              <div className="w-[268px] h-[55.25px] bg-transparent rounded-lg mb-4 flex items-start justify-start">
-                <p className="text-sm text-gray-400">{formData.bio || "Bio not provided."}</p>
+              <div className="w-[268px] h-[24px] bg-transparent rounded-lg mb-2 flex items-center justify-start">
+                <p className="text-sm">{formData.bio || "Bio"}</p>
               </div>
             </div>
           </div>
