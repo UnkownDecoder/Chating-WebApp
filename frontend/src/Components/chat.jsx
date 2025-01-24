@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import muteSound from '/sounds/mute.mp3';
 import unmuteSound from '/sounds/unmute.mp3';
 
@@ -27,6 +28,8 @@ const Chat = (userId) => {
   const minSidebarWidth = 200;
   const maxSidebarWidth = 400;
   const sidebarRef = useRef(null);
+
+  const navigate = useNavigate(); // Initialize navigate function
 
   useEffect(() => {
     const newSocket = io('http://localhost:5172');
@@ -94,6 +97,10 @@ const Chat = (userId) => {
     setFriendRequestMessage(''); // Clear the message after sending
   };
 
+  const handleSettingsClick = () => {
+    navigate('/settings'); // Navigate to Settings page
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <div
@@ -138,7 +145,7 @@ const Chat = (userId) => {
               </button>
             </div>
             <div className="relative group">
-              <button className="text-white hover:text-gray-400">
+              <button className="text-white hover:text-gray-400" onClick={handleSettingsClick}>
                 <FaCog />
               </button>
             </div>

@@ -8,7 +8,8 @@ import Reviews from "./pages/Reviews";
 import Footer from "./Components/Footer";
 import Features from "./pages/Features";
 import ForgetPass from "./Components/ForgetPassword";
-import Chat from "./Components/chat"; // Chat component import
+import Chat from "./Components/chat"; 
+import Settings from "./Components/Settings";
 
 const App = () => {
   return (
@@ -22,7 +23,7 @@ const AppLayout = () => {
   const location = useLocation(); // Get current route location
 
   // Define routes where Header and Footer should not be shown
-  const noHeaderFooterRoutes = ["/chat"];
+  const noHeaderFooterRoutes = ['/settings', '/chat'];
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900">
@@ -37,7 +38,8 @@ const AppLayout = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/features" element={<Features />} />
           <Route path="/forgot-password" element={<ForgetPass />} />
-          <Route path="/chat" element={<Chat />} /> {/* Chat page route */}
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/settings" element={<Settings />} /> 
         </Routes>
       </div>
 

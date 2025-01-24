@@ -26,7 +26,7 @@ const About = () => {
     },
     {
       userPhoto: MommyImage,
-      username: "HerMommy",
+      username: "Shreya",
       rating: 5,
       review: "The end-to-end encryption gives me peace of mind. Highly recommend it!",
     },
