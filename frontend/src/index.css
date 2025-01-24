@@ -20,48 +20,46 @@ body {
 
   
 /* Custom Gradient Text for Hover */
-.hover\:text-gradient:hover {
-    background-image: linear-gradient(to right, #ff7e5f, #feb47b);
-    background-clip: text; /* Use for modern browsers */
-    -webkit-background-clip: text; /* Webkit-based browsers (Safari) */
-    color: transparent; /* Ensures text is transparent and shows the gradient */
-  }
+.alert-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in, fadeOut 0.5s ease-out 3.5s forwards;
+  z-index: 1000; /* Ensure it appears above other elements */
+}
 
-  .alert-box {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #4CAF50;
-    color: white;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    opacity: 0;
-    animation: fadeIn 0.5s ease-in, fadeOut 0.5s ease-out 3.5s forwards;
-  }
-  
-  @keyframes fadeIn {
-    from {
+@keyframes fadeIn {
+  from {
       opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+      transform: translate(-50%, -60%);
   }
-  
-  @keyframes fadeOut {
-    from {
+  to {
       opacity: 1;
-    }
-    to {
+      transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+      opacity: 1;
+  }
+  to {
       opacity: 0;
-    }
   }
+}
+
+
+
   /* src/index.css */
+  /* THIS IS*/
 @font-face {
   font-family: 'slick';
   src: url('/fonts/slick.woff') format('woff'),
@@ -69,9 +67,36 @@ body {
 }
 
 @font-face {
-  font-family: RacingSportDisplay-Regular;
-  src: url('../src/fonts/RacingSportDisplay-Regular.otf') format('truetype'),
+  font-family: Race;
+  src: url('../public/fonts/RacingSportDisplay-Regular.otf') format('truetype'),
 }
+
+@font-face {
+  font-family: fish;
+  src: url('../public/fonts/Monstrous\ Fish.otf') format('truetype'),
+}
+
+
+@font-face {
+  font-family: box;
+  src: url('../public/fonts/Boxiest-Regular.ttf') format('truetype'),
+}
+
+@font-face {
+  font-family: poker;
+  src: url('../public/fonts/Poker\ Nightmare.ttf') format('truetype'),
+}
+
+@font-face {
+  font-family: smesh;
+  src: url('../public/fonts/SMESH') format('truetype'),
+}
+
+@font-face {
+  font-family: Sweet;
+  src: url('../public/fonts/Sweet\ Home\ Alabama.ttf') format('truetype'),
+}
+
 
 .dropdown-message {
   position: fixed;
@@ -99,3 +124,11 @@ body {
   }
 }
 
+.hover-gradient {
+  background: linear-gradient(to right, #3b82f6, #9333ea);
+  transition: background 0.3s ease;
+}
+
+.hover-gradient:hover {
+  background: linear-gradient(to right, #60a5fa, #a855f7);
+}

@@ -103,7 +103,7 @@ const About = () => {
         {/* Contact Us Button */}
         <button
           onClick={() => window.open("mailto:driverbaby307@gmail.com")}
-          className="mt-12 px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold rounded-full shadow-xl transform transition duration-500 hover:bg-yellow-300 hover:scale-110"
+          className="mt-12 px-8 py-4 md:px-10 md:py-5 bg-gradient-to-r from-blue-400 to-purple-500 text-black font-bold rounded-full shadow-xl transform transition duration-500 hover:bg-yellow-300 hover:scale-110"
         >
           Contact Us
         </button>

@@ -9,7 +9,7 @@ const Header = () => {
     <header className="bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white px-6 py-4 shadow-lg">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-wide glow-effect">
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-wide "style={{ fontFamily: 'box' }}>
           Chat-Zone
         </h1>
 
@@ -20,20 +20,23 @@ const Header = () => {
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
               location.pathname === "/" ? "text-blue-300" : "hover:scale-105"
             }`}
+            style={{ fontFamily: 'smesh' }}
           >
             Home
           </Link>
           <Link
             to="/Reviews"
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
-              location.pathname === "/Reviews" ? "text-blue-300" : "hover:scale-105"
+              location.pathname === "/Reviews" ? "text-blue-300" : "hover:scale-105" 
             }`}
+            style={{ fontFamily: 'smesh' }}  
           >
             Reviews
           </Link>
           <Link
             to="/features"
             className="text-lg font-medium hover:text-blue-300 transition-all duration-300 hover:scale-105"
+            style={{ fontFamily: 'smesh' }}
           >
             Features
           </Link>
@@ -42,6 +45,7 @@ const Header = () => {
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
               location.pathname === "/login" ? "text-blue-300" : "hover:scale-105"
             }`}
+            style={{ fontFamily: 'smesh' }}
           >
             Login
           </Link>

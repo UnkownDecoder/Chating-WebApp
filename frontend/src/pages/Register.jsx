@@ -1,5 +1,4 @@
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate, Link } from 'react-router-dom';
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa"; // Icons for toggling visibility and removing images
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
@@ -15,9 +14,7 @@ const Register = () => {
     bio: "",
   });
 
-
   const navigate = useNavigate();
-
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -95,7 +92,6 @@ const Register = () => {
         formDataToSend.append("birthdate", formData.birthdate);
         formDataToSend.append("bio", formData.bio);
         formDataToSend.append("password", formData.password);
-        
 
         const response = await fetch("http://localhost:5172/api/auth/register", {
           method: "POST",
@@ -129,7 +125,6 @@ const Register = () => {
       }
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">
@@ -340,6 +335,11 @@ const Register = () => {
               {successMessage}
             </div>
           )}
+
+          {/* Login Link */}
+          <div className="mt-4 text-center text-white">
+            Already have an account? <Link to="/login" className="text-blue-500 hover:underline">Login here</Link>
+          </div>
         </div>
 
         {/* Right Section: Preview */}
@@ -390,11 +390,3 @@ const Register = () => {
 };
 
 export default Register;
-
-
-
-
-
-
-
-

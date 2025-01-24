@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
+import { IoMdSend } from 'react-icons/io'; // Import the send icon
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import muteSound from '/sounds/mute.mp3';
 import unmuteSound from '/sounds/unmute.mp3';
+import userprofile from '/src/assets/images/user.jpg';
 
 const Chat = (userId) => {
   const [socket, setSocket] = useState(null);
@@ -28,8 +30,13 @@ const Chat = (userId) => {
   const minSidebarWidth = 200;
   const maxSidebarWidth = 400;
   const sidebarRef = useRef(null);
+  const textareaRef = useRef(null); // Add a ref for the textarea
 
   const navigate = useNavigate(); // Initialize navigate function
+
+  // Create Audio objects for mute and unmute sounds
+  const muteAudio = new Audio(muteSound);
+  const unmuteAudio = new Audio(unmuteSound);
 
   useEffect(() => {
     const newSocket = io('http://localhost:5172');
@@ -49,10 +56,14 @@ const Chat = (userId) => {
         const data = await response.json();
         setUser({
           username: data.username,
-          photo: data.photo,
+          photo: data.photo || userprofile, // Use default image if photo is not available
         });
       } catch (error) {
         console.error('Error fetching user profile:', error);
+        setUser({
+          username: 'Default User', // Default username
+          photo: userprofile, // Default image
+        });
       }
     };
 
@@ -65,11 +76,19 @@ const Chat = (userId) => {
     if (message.trim()) {
       socket.emit('chat message', message);
       setMessage('');
+      adjustTextareaHeight(); // Reset the height after sending the message
     }
   };
 
   const handleTyping = () => {
     socket.emit('typing', user.username);
+    adjustTextareaHeight(); // Adjust the height while typing
+  };
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    textarea.style.height = 'auto'; // Reset the height
+    textarea.style.height = `${textarea.scrollHeight}px`; // Set the height based on the content
   };
 
   const toggleMute = () => {
@@ -102,18 +121,18 @@ const Chat = (userId) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-black">
       <div
         ref={sidebarRef}
         style={{ width: `${sidebarWidth}px` }}
-        className="bg-gray-800 text-white p-4 flex flex-col justify-between"
+        className="bg-gray-900 text-white p-4 flex flex-col justify-between"
       >
         <input
           type="text"
           value={searchQuery}
           onClick={() => setShowPopup(true)}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full p-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 mb-4 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white"
           placeholder="Find or Start Conversation"
           style={{ height: '35px', fontSize: '14px' }}
         />
@@ -154,17 +173,17 @@ const Chat = (userId) => {
       </div>
 
       {/* Right Section */}
-      <div className="flex-grow flex flex-col bg-white">
+      <div className="flex-grow flex flex-col bg-gray-900 text-white">
         {/* Friends Navbar (moved to top) */}
         {showFriends && (
-          <div className="flex justify-start items-center p-4 bg-gray-200 space-x-4">
+          <div className="flex justify-start items-center p-4 bg-gray-800 space-x-4">
             <span className="font-semibold text-xl mr-4">Friends</span>
-            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">Online</button>
-            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">All</button>
-            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">Pending</button>
-            <button className="p-2 bg-transparent hover:bg-gray-400 rounded-lg">Blocked</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Online</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">All</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Pending</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Blocked</button>
             <button
-              className="p-2  bg-green-500 hover:bg-green-600 text-white rounded-lg"
+              className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
               onClick={handleAddFriendClick} // Handle Add Friend click
             >
               Add Friend
@@ -176,12 +195,12 @@ const Chat = (userId) => {
         {showAddFriendMessage && (
           <div className="p-4">
             <h2 className="text-2xl font-semibold mb-2">Add Friend</h2>
-            <p className="text-sm text-gray-500 mb-4">You can add friends with their username or their unique ID number</p>
+            <p className="text-sm text-gray-400 mb-4">You can add friends with their username or their unique ID number</p>
             <textarea
               value={friendRequestMessage}
               onChange={(e) => setFriendRequestMessage(e.target.value)}
               placeholder="You can add friends with their username or their unique ID number"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-2"
+              className="w-full p-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-800 text-white mb-2"
               rows={1}
             />
             <button
@@ -198,7 +217,7 @@ const Chat = (userId) => {
           {!showFriends ? (
             <div className="space-y-4">
               {messages.map((msg, index) => (
-                <div key={index} className="p-2 bg-gray-200 rounded-lg">
+                <div key={index} className="p-2 bg-gray-800 rounded-lg">
                   {msg}
                 </div>
               ))}
@@ -211,23 +230,24 @@ const Chat = (userId) => {
         </div>
 
         {/* Typing Indicator */}
-        {!showFriends && <div className="p-2 text-gray-500 italic">{typing}</div>}
+        {!showFriends && <div className="p-2 text-gray-400 italic">{typing}</div>}
 
         {/* Message Input */}
         {!showFriends && (
-          <div className="p-4 bg-gray-200 flex items-center">
+          <div className="p-4 bg-gray-800 flex items-center">
             <textarea
+              ref={textareaRef} // Add the ref to the textarea
               value={message}
               onChange={(e) => { setMessage(e.target.value); handleTyping(); }}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full p-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-900 text-white"
               placeholder="Type a message"
               rows={1}
             />
             <button
               onClick={handleSendMessage}
-              className="ml-2 bg-blue-600 text-white p-2 rounded-lg"
+              className="ml-2 bg-blue-600 text-white p-2 rounded-lg flex items-center justify-center hover:bg-purple-600"
             >
-              Send
+              <IoMdSend size={24} />
             </button>
           </div>
         )}
