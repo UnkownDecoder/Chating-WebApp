@@ -52,11 +52,17 @@ const Login = () => {
         const result = await response.json();
         if (response.ok) {
           console.log("response ", result);
-          setErrorMessage(`Welcome, ${result.name || "User"}!`);
+          setErrorMessage(`Welcome, ${result.user.username || "User"}!`);
           setShowMessage(true);
           setTimeout(() => {
             setShowMessage(false);
-            navigate("/chat"); // Redirect to Chat.jsx
+            // Pass username and profileImage as state to the /chat route
+            navigate("/chat", {
+              state: {
+                username: result.user.username,
+                profileImage: result.user.profileImage || "default-image-url", // Default image if not present
+              },
+            });
           }, 3000); // Show message for 3 seconds
         } else {
           setErrorMessage(result.message || "Login failed");

@@ -20,7 +20,7 @@ const Header = () => {
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
               location.pathname === "/" ? "text-blue-300" : "hover:scale-105"
             }`}
-            style={{ fontFamily: 'smesh' }}
+            style={{ fontFamily: 'wall' }}
           >
             Home
           </Link>
@@ -29,23 +29,32 @@ const Header = () => {
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
               location.pathname === "/Reviews" ? "text-blue-300" : "hover:scale-105" 
             }`}
-            style={{ fontFamily: 'smesh' }}  
+            style={{ fontFamily: 'wall' }}  
           >
             Reviews
           </Link>
           <Link
             to="/features"
             className="text-lg font-medium hover:text-blue-300 transition-all duration-300 hover:scale-105"
-            style={{ fontFamily: 'smesh' }}
+            style={{ fontFamily: 'wall' }}
           >
             Features
+          </Link>
+          <Link
+            to="/developers"
+            className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
+              location.pathname === "/developers" ? "text-blue-300" : "hover:scale-105"
+            }`}
+            style={{ fontFamily: 'wall' }}
+          >
+            Developers
           </Link>
           <Link
             to="/login"
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
               location.pathname === "/login" ? "text-blue-300" : "hover:scale-105"
             }`}
-            style={{ fontFamily: 'smesh' }}
+            style={{ fontFamily: 'wall' }}
           >
             Login
           </Link>
@@ -111,6 +120,17 @@ const Header = () => {
               >
                 Features
               </a>
+            </li>
+            <li>
+              <Link
+                to="/developers"
+                onClick={() => setIsMenuOpen(false)}
+                className={`block text-lg font-medium hover:text-blue-300 ${
+                  location.pathname === "/developers" ? "text-blue-300" : ""
+                }`}
+              >
+                Developers
+              </Link>
             </li>
             <li>
               <Link

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom"; 
 import { io } from 'socket.io-client';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
 import { IoMdSend } from 'react-icons/io'; // Import the send icon
@@ -15,9 +16,10 @@ const Chat = (userId) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [showPopup, setShowPopup] = useState(false);
+  const location = useLocation();
   const [user, setUser] = useState({
-    username: '', // Default value before login
-    photo: '', // Default image URL before login
+    username: location.state?.username || "Guest", // Set username if passed via state
+    profileImage: location.state?.profileImage || "default-image-url",// Default image URL before login
   });
 
   const [isMuted, setIsMuted] = useState(false);
@@ -44,33 +46,41 @@ const Chat = (userId) => {
 
     newSocket.on('chat message', (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
+
+      if (location.state) {
+        setUser({
+          username: location.state.username,
+          profileImage: location.state.profileImage,
+        });
+      }
+  
     });
 
     newSocket.on('typing', (username) => {
       setTyping(`${username} is typing...`);
     });
 
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch('/api/user'); // Example endpoint
-        const data = await response.json();
-        setUser({
-          username: data.username,
-          photo: data.photo || userprofile, // Use default image if photo is not available
-        });
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        setUser({
-          username: 'Default User', // Default username
-          photo: userprofile, // Default image
-        });
-      }
-    };
+    // const fetchUserProfile = async () => {
+    //   try {
+    //     const response = await fetch('http://localhost:5172/api/user'); // Example endpoint
+    //     const data = await response.json();
+    //     setUser({
+    //       username: data.username,
+    //       photo: data.photo || userprofile, // Use default image if photo is not available
+    //     });
+    //   } catch (error) {
+    //     console.error('Error fetching user profile:', error);
+    //     setUser({
+    //       username: 'Default User', // Default username
+    //       photo: userprofile, // Default image
+    //     });
+    //   }
+    // };
 
-    fetchUserProfile();
+    // fetchUserProfile();
 
     return () => newSocket.close();
-  }, []);
+  }, [location.state]);
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -147,7 +157,7 @@ const Chat = (userId) => {
 
         <div className="mt-auto flex items-center mb-4">
           <img
-            src={user.photo}
+           src={user.profileImage}
             alt="User"
             className="rounded-full w-10 h-10 mr-3"
           />

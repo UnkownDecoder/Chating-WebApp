@@ -97,6 +97,10 @@ body {
   src: url('../public/fonts/Sweet\ Home\ Alabama.ttf') format('truetype'),
 }
 
+@font-face {
+  font-family: wall;
+  src: url('../public/fonts/TOUGHWALL.ttf') format('truetype'),
+}
 
 .dropdown-message {
   position: fixed;

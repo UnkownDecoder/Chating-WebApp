@@ -10,6 +10,7 @@ import Features from "./pages/Features";
 import ForgetPass from "./Components/ForgetPassword";
 import Chat from "./Components/chat"; 
 import Settings from "./Components/Settings";
+import Developers from "./pages/Developers";
 
 const App = () => {
   return (
@@ -39,7 +40,8 @@ const AppLayout = () => {
           <Route path="/features" element={<Features />} />
           <Route path="/forgot-password" element={<ForgetPass />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/settings" element={<Settings />} /> 
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/developers" element={<Developers />} /> 
         </Routes>
       </div>
 
