@@ -58,24 +58,7 @@ const Chat = ({userId}) => {
       setTyping(`${username} is typing...`);
     });
 
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch('/api/user'); // Example endpoint
-        const data = await response.json();
-        setUser({
-          username: data.username,
-          photo: data.photo || userprofile, // Use default image if photo is not available
-        });
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        setUser({
-          username: 'Default User', // Default username
-          photo: userprofile, // Default image
-        });
-      }
-    };
-
-    fetchUserProfile();
+    
 
     return () => newSocket.close();
   }, []);
