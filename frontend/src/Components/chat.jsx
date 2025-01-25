@@ -8,7 +8,7 @@ import muteSound from '/sounds/mute.mp3';
 import unmuteSound from '/sounds/unmute.mp3';
 import userprofile from '/src/assets/images/user.jpg';
 
-const Chat = (userId) => {
+const Chat = ({userId}) => {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -29,8 +29,6 @@ const Chat = (userId) => {
 
   const [friendRequestMessage, setFriendRequestMessage] = useState(''); // State for friend request message
 
-  const minSidebarWidth = 200;
-  const maxSidebarWidth = 400;
   const sidebarRef = useRef(null);
   const textareaRef = useRef(null); // Add a ref for the textarea
 
@@ -60,27 +58,27 @@ const Chat = (userId) => {
       setTyping(`${username} is typing...`);
     });
 
-    // const fetchUserProfile = async () => {
-    //   try {
-    //     const response = await fetch('http://localhost:5172/api/user'); // Example endpoint
-    //     const data = await response.json();
-    //     setUser({
-    //       username: data.username,
-    //       photo: data.photo || userprofile, // Use default image if photo is not available
-    //     });
-    //   } catch (error) {
-    //     console.error('Error fetching user profile:', error);
-    //     setUser({
-    //       username: 'Default User', // Default username
-    //       photo: userprofile, // Default image
-    //     });
-    //   }
-    // };
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch('/api/user'); // Example endpoint
+        const data = await response.json();
+        setUser({
+          username: data.username,
+          photo: data.photo || userprofile, // Use default image if photo is not available
+        });
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        setUser({
+          username: 'Default User', // Default username
+          photo: userprofile, // Default image
+        });
+      }
+    };
 
-    // fetchUserProfile();
+    fetchUserProfile();
 
     return () => newSocket.close();
-  }, [location.state]);
+  }, []);
 
   const handleSendMessage = () => {
     if (message.trim()) {
