@@ -7,7 +7,7 @@ import muteSound from '/sounds/mute.mp3';
 import unmuteSound from '/sounds/unmute.mp3';
 import userprofile from '/src/assets/images/user.jpg';
 
-const Chat = (userId) => {
+const Chat = ({userId}) => {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -27,8 +27,6 @@ const Chat = (userId) => {
 
   const [friendRequestMessage, setFriendRequestMessage] = useState(''); // State for friend request message
 
-  const minSidebarWidth = 200;
-  const maxSidebarWidth = 400;
   const sidebarRef = useRef(null);
   const textareaRef = useRef(null); // Add a ref for the textarea
 
@@ -50,9 +48,9 @@ const Chat = (userId) => {
       setTyping(`${username} is typing...`);
     });
 
-    const fetchUserProfile = async () => {
+    const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/user'); // Example endpoint
+        const response = await fetch(`/api/user/${userId}`); // Example endpoint
         const data = await response.json();
         setUser({
           username: data.username,
@@ -67,10 +65,12 @@ const Chat = (userId) => {
       }
     };
 
-    fetchUserProfile();
+    fetchUserData();
+    
+    
 
     return () => newSocket.close();
-  }, []);
+  }, [userId]);
 
   const handleSendMessage = () => {
     if (message.trim()) {

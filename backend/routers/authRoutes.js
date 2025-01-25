@@ -11,11 +11,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Routes
-router.post(
-  '/register',
-  upload.fields([{ name: 'bannerImage' }, { name: 'profileImage' }]),
-  authController.signUp
-);
+router.post('/register', upload.fields([{ name: 'bannerImage' }, { name: 'profileImage' }]),authController.signUp);
 
 router.route('/login').post(authController.signIn);
 
