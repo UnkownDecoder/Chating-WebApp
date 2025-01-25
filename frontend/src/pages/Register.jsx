@@ -43,10 +43,16 @@ const Register = () => {
         return;
       }
       const imageUrl = URL.createObjectURL(file);
-      if (type === "profile") setProfileImage(imageUrl);
-      if (type === "banner") setBannerImage(imageUrl);
+      if (type === "profile") {
+        setProfileImage(file); // Store the file, not the URL
+      }
+      if (type === "banner") {
+        setBannerImage(file); // Store the file, not the URL
+      }
+      console.log(type + " image selected:", file);  // Add this log to check the selected file
     }
   };
+  
 
   const handleRemoveImage = (type) => {
     if (type === "profile") setProfileImage(null);
@@ -84,8 +90,8 @@ const Register = () => {
       setLoading(true);
       try {
         const formDataToSend = new FormData();
-        if (profileImage) formDataToSend.append("profileImage", profileImage);
-        if (bannerImage) formDataToSend.append("bannerImage", bannerImage);
+        formDataToSend.append("bannerImage", bannerImage); // Append the file, not the state variable
+        formDataToSend.append("profileImage", profileImage); // Append the file, not the state variable
         formDataToSend.append("username", formData.username);
         formDataToSend.append("email", formData.email);
         formDataToSend.append("phone", formData.phone);
@@ -125,7 +131,6 @@ const Register = () => {
       }
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">
       <div className="w-full max-w-4xl flex space-x-8">
@@ -343,14 +348,14 @@ const Register = () => {
         </div>
 
         {/* Right Section: Preview */}
-        <div className="w-[300px] h-[340.85px] bg-gray-800 text-white rounded-lg shadow-lg">
+        <div className="w-[300px] h-[340.85px] bg-gray-800 text-white rounded-lg shadow-lg ">
           <div className="relative flex flex-col items-center space-y-4">
             {/* Header Div with Banner Image */}
             <div className="w-[300px] h-[150px] bg-gray-700 rounded-lg">
               {bannerImage ? (
                 <img
-                  src={bannerImage}
-                  alt="Banner"
+                   src={URL.createObjectURL(bannerImage)}  // Similarly, create a temporary URL for banner image preview
+                   alt="Banner"
                   className="w-full h-full object-cover rounded-lg"
                 />
               ) : (
@@ -363,9 +368,9 @@ const Register = () => {
               <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-900">
                 {profileImage ? (
                   <img
-                    src={profileImage}
-                    alt="Profile"
-                    className="w-full h-full object-cover rounded-full"
+                     src={URL.createObjectURL(profileImage)}  // This creates a temporary URL for preview
+                     alt="Profile"
+                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
                   <MdPhotoCamera className="text-4xl text-gray-400" />
@@ -378,8 +383,8 @@ const Register = () => {
               <div className="w-[268px] h-[24px] bg-transparent rounded-lg mb-4 flex items-center justify-start">
                 <h3 className="text-xl font-semibold">{formData.username || "Username"}</h3>
               </div>
-              <div className="w-[268px] h-[24px] bg-transparent rounded-lg mb-2 flex items-center justify-start">
-                <p className="text-sm">{formData.bio || "Bio"}</p>
+              <div className="w-[268px] h-[55.25px] bg-transparent rounded-lg mb-4 flex items-start justify-start">
+                <p className="text-sm text-gray-400">{formData.bio || "Bio not provided."}</p>
               </div>
             </div>
           </div>
