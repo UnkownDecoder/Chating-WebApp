@@ -4,6 +4,7 @@ const multer = require('multer');
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel'); // Adjust the path as needed
 const mongoose = require('mongoose');
+const cloudinary = require('../library/cloudinary');
 const { GridFSBucket } = require('mongodb');
 require('dotenv').config();
 
