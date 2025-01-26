@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 const FriendReq = require('./routers/authUser');
 const http = require('http');
 const socketIo = require('socket.io'); // Import socket.io
+const messageRoutes = require('./routers/message.routes');
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -89,6 +90,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/forget', forgetPas);
 app.use('/api/user', userInfo);
 app.use('/api/AddFriends', FriendReq);
+app.use('/api/message', messageRoutes);
 
 // Socket.IO setup for real-time chat
 io.on('connection', (socket) => {
