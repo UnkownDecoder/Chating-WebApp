@@ -2,7 +2,6 @@ const express = require('express');
 const bcrypt = require('bcryptjs'); // Ensure bcryptjs is installed
 const User = require('../models/userModel'); 
 const multer = require('multer');
-
 const authController = require("../controllers/authController");
 const router = express.Router();
 

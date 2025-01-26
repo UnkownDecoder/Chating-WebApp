@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import { io } from 'socket.io-client';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
-import { IoMdSend } from 'react-icons/io'; // Import the send icon
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import muteSound from '/sounds/mute.mp3';
-import unmuteSound from '/sounds/unmute.mp3';
-import userprofile from '/src/assets/images/user.jpg';
+import { IoMdSend } from 'react-icons/io';
+import AddFriends from './AddFriends';
 
-const Chat = ({userId}) => {
+const Chat = ({ userId }) => {
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -18,25 +15,23 @@ const Chat = ({userId}) => {
   const [showPopup, setShowPopup] = useState(false);
   const location = useLocation();
   const [user, setUser] = useState({
-    username: location.state?.username || "Guest", // Set username if passed via state
-    profileImage: location.state?.profileImage || "default-image-url",// Default image URL before login
+    username: location.state?.username || "Guest",
+    profileImage: location.state?.profileImage || "default-image-url",
   });
 
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
-  const [showFriends, setShowFriends] = useState(false);  // Added state to toggle friends view
-  const [showAddFriendMessage, setShowAddFriendMessage] = useState(false);  // State to show message for adding friend
-
-  const [friendRequestMessage, setFriendRequestMessage] = useState(''); // State for friend request message
+  const [showFriends, setShowFriends] = useState(false);
+  const [showAddFriendMessage, setShowAddFriendMessage] = useState(false);
+  const [friendRequestMessage, setFriendRequestMessage] = useState('');
 
   const sidebarRef = useRef(null);
-  const textareaRef = useRef(null); // Add a ref for the textarea
+  const textareaRef = useRef(null);
 
-  const navigate = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate();
 
-  // Create Audio objects for mute and unmute sounds
-  const muteAudio = new Audio(muteSound);
-  const unmuteAudio = new Audio(unmuteSound);
+  const muteAudio = new Audio('/sounds/mute.mp3');
+  const unmuteAudio = new Audio('/sounds/unmute.mp3');
 
   useEffect(() => {
     const newSocket = io('http://localhost:5172');
@@ -51,14 +46,11 @@ const Chat = ({userId}) => {
           profileImage: location.state.profileImage,
         });
       }
-  
     });
 
     newSocket.on('typing', (username) => {
       setTyping(`${username} is typing...`);
     });
-
-    
 
     return () => newSocket.close();
   }, []);
@@ -67,19 +59,19 @@ const Chat = ({userId}) => {
     if (message.trim()) {
       socket.emit('chat message', message);
       setMessage('');
-      adjustTextareaHeight(); // Reset the height after sending the message
+      adjustTextareaHeight();
     }
   };
 
   const handleTyping = () => {
     socket.emit('typing', user.username);
-    adjustTextareaHeight(); // Adjust the height while typing
+    adjustTextareaHeight();
   };
 
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
-    textarea.style.height = 'auto'; // Reset the height
-    textarea.style.height = `${textarea.scrollHeight}px`; // Set the height based on the content
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const toggleMute = () => {
@@ -93,26 +85,22 @@ const Chat = ({userId}) => {
   };
 
   const toggleFriendsView = () => {
-    setShowFriends(!showFriends); // Toggle friends view
-    setShowAddFriendMessage(false); // Hide the "Add Friend" message when toggling the friends view
-  };
-
-  const handleAddFriendClick = () => {
-    setShowAddFriendMessage(true); // Show the message below "Add Friend" button when clicked
-  };
-
-  const handleFriendRequestSend = () => {
-    // Handle sending friend request logic here
-    console.log('Sending friend request:', friendRequestMessage);
-    setFriendRequestMessage(''); // Clear the message after sending
+    setShowFriends(!showFriends);
+    setShowAddFriendMessage(false);
   };
 
   const handleSettingsClick = () => {
-    navigate('/settings'); // Navigate to Settings page
+    navigate('/settings');
+  };
+
+  const handleFriendRequestSend = () => {
+    console.log('Sending friend request:', friendRequestMessage);
+    setFriendRequestMessage('');
   };
 
   return (
     <div className="flex h-screen bg-black">
+      {/* Left Sidebar - Friends Section */}
       <div
         ref={sidebarRef}
         style={{ width: `${sidebarWidth}px` }}
@@ -127,18 +115,15 @@ const Chat = ({userId}) => {
           placeholder="Find or Start Conversation"
           style={{ height: '35px', fontSize: '14px' }}
         />
-
         <button
           className="w-full py-2 mb-4 bg-transparent text-left text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onClick={toggleFriendsView} // Toggle friends view on button click
-          style={{ transition: 'background-color 0.3s ease' }}
+          onClick={toggleFriendsView}
         >
           Friends
         </button>
-
         <div className="mt-auto flex items-center mb-4">
           <img
-           src={user.profileImage}
+            src={user.profileImage}
             alt="User"
             className="rounded-full w-10 h-10 mr-3"
           />
@@ -163,49 +148,18 @@ const Chat = ({userId}) => {
         </div>
       </div>
 
-      {/* Right Section */}
-      <div className="flex-grow flex flex-col bg-gray-900 text-white">
-        {/* Friends Navbar (moved to top) */}
-        {showFriends && (
-          <div className="flex justify-start items-center p-4 bg-gray-800 space-x-4">
-            <span className="font-semibold text-xl mr-4">Friends</span>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Online</button>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">All</button>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Pending</button>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Blocked</button>
-            <button
-              className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
-              onClick={handleAddFriendClick} // Handle Add Friend click
-            >
-              Add Friend
-            </button>
-          </div>
-        )}
-
-        {/* Add Friend Message and Friend Request Input */}
-        {showAddFriendMessage && (
-          <div className="p-4">
-            <h2 className="text-2xl font-semibold mb-2">Add Friend</h2>
-            <p className="text-sm text-gray-400 mb-4">You can add friends with their username or their unique ID number</p>
-            <textarea
-              value={friendRequestMessage}
-              onChange={(e) => setFriendRequestMessage(e.target.value)}
-              placeholder="You can add friends with their username or their unique ID number"
-              className="w-full p-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-800 text-white mb-2"
-              rows={1}
-            />
-            <button
-              onClick={handleFriendRequestSend}
-              className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-            >
-              Send Friend Request
-            </button>
-          </div>
-        )}
-
-        {/* Chat Room or Friends View Content */}
-        <div className="flex-grow p-4 overflow-y-auto">
-          {!showFriends ? (
+      {/* Middle Section - Chat Room */}
+      <div className="flex-grow flex flex-col bg-gray-900 text-white border-l-2 border-r-2 border-gray-700">
+        {showFriends ? (
+          <AddFriends
+            showAddFriendMessage={showAddFriendMessage}
+            setShowAddFriendMessage={setShowAddFriendMessage}
+            friendRequestMessage={friendRequestMessage}
+            setFriendRequestMessage={setFriendRequestMessage}
+            handleFriendRequestSend={handleFriendRequestSend}
+          />
+        ) : (
+          <div className="flex-grow p-4 overflow-y-auto">
             <div className="space-y-4">
               {messages.map((msg, index) => (
                 <div key={index} className="p-2 bg-gray-800 rounded-lg">
@@ -213,21 +167,15 @@ const Chat = ({userId}) => {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Additional friends content goes here */}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Typing Indicator */}
         {!showFriends && <div className="p-2 text-gray-400 italic">{typing}</div>}
 
-        {/* Message Input */}
         {!showFriends && (
           <div className="p-4 bg-gray-800 flex items-center">
             <textarea
-              ref={textareaRef} // Add the ref to the textarea
+              ref={textareaRef}
               value={message}
               onChange={(e) => { setMessage(e.target.value); handleTyping(); }}
               className="w-full p-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-900 text-white"
@@ -243,6 +191,30 @@ const Chat = ({userId}) => {
           </div>
         )}
       </div>
+
+      {/* Right Sidebar - User Profile (conditionally render this section based on showFriends) */}
+      {!showFriends && (
+        <div className="bg-gray-900 text-white p-4 flex flex-col justify-between w-80">
+          <div className="flex items-center mb-4">
+            <img
+              src={user.profileImage}
+              alt="User"
+              className="rounded-full w-16 h-16 mr-4"
+            />
+            <div>
+              <span className="text-xl font-semibold">{user.username}</span>
+              <button className="mt-2 text-blue-500" onClick={handleSettingsClick}>Edit Profile</button>
+            </div>
+          </div>
+
+          <button
+            className="w-full py-2 mt-auto bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            onClick={handleSettingsClick}
+          >
+            Settings
+          </button>
+        </div>
+      )}
     </div>
   );
 };
