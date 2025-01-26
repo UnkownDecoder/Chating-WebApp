@@ -1,7 +1,9 @@
-const Review = require("../models/reviewModel");
+// reviewController.js
+
+import Review from "../models/reviewModel.js";  // Using ES6 import for the Review model
 
 // Fetch all reviews
-exports.getReviews = async (req, res) => {
+export const getReviews = async (req, res) => {
   try {
     const reviews = await Review.find();
     res.status(200).json(reviews);
@@ -11,7 +13,7 @@ exports.getReviews = async (req, res) => {
 };
 
 // Add a review
-exports.addReview = async (req, res) => {
+export const addReview = async (req, res) => {
   try {
     const newReview = new Review(req.body);
     await newReview.save();

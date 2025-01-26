@@ -1,134 +1,138 @@
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const bcrypt = require('bcrypt');
-const User = require('../models/userModel'); // Adjust the path as needed
-const mongoose = require('mongoose');
-const cloudinary = require('../library/cloudinary');
-const { GridFSBucket } = require('mongodb');
-require('dotenv').config();
+// authController.js
+import bcrypt from 'bcrypt';
+import User from '../models/userModel.js'; 
 
-// Initialize GridFSBucket when MongoDB connection is open
-let gfsBucket;
-const conn = mongoose.connection;
-conn.once('open', () => {
-  gfsBucket = new GridFSBucket(conn.db, { bucketName: 'uploads' });
-});
-
-// Helper function to upload a file to GridFS
-const uploadFileToGridFS = (file) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = gfsBucket.openUploadStream(file.originalname, {
-      contentType: file.mimetype,
-    });
-    uploadStream.end(file.buffer);
-
-    uploadStream.on('finish', () => resolve(uploadStream.id)); // Resolve with the file ID
-    uploadStream.on('error', reject);
-  });
-};
+import cloudinary from '../library/cloudinary.js'; 
+import { generateToken } from '../library/utils.js';
 
 // Controller function for user registration
-const signUp = async (req, res) => {
-  try {
-    const { username, email, phone, birthdate, bio, password } = req.body;
-    const files = req.files;
-
-    // Debugging: Check if files are coming through properly
-    console.log('Files received:', files);
-
-    if (!username || !email || !phone || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Upload files to GridFS
-    const bannerImage = files.bannerImage ? files.bannerImage[0] : null;
-    const profileImage = files.profileImage ? files.profileImage[0] : null;
-
-    const [bannerImageId, profileImageId] = await Promise.all([
-      bannerImage ? uploadFileToGridFS(bannerImage) : null,
-      profileImage ? uploadFileToGridFS(profileImage) : null,
-    ]);
-
-    // Debugging: Check if IDs are generated for images
-    console.log('Banner Image ID:', bannerImageId);
-    console.log('Profile Image ID:', profileImageId);
-
-    // Create a new user
-    const newUser = new User({
-      username,
-      email,
-      phone,
-      birthdate,
-      bio,
-      password: hashedPassword,
-      bannerImage: bannerImageId || null,
-      profileImage: profileImageId || null,
-    });
-
-    const userCreated = await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully', user: userCreated });
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+export const signup = async (req , res) => {
+  const { username, email, phone, birthdate, bio, password , profileImage , bannerImage } = req.body;
+ try {
+  if (!username || !email || !phone || !password || !birthdate) {
+    return res.status(400).json({ message: 'All fields are required' });
   }
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters' });
+  }
+  const user = await User.findOne({ email });
+  if (user) {
+    return res.status(400).json({ message: 'User already exists' });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  const newUser = new User({
+    username,
+    email,
+    phone,
+    birthdate,
+    bio,
+    password: hashedPassword,
+    profileImage: profileImage || null,
+    bannerImage: bannerImage || null,
+  });
+
+  if(newUser) {
+    // generate jwt token
+    generateToken(newUser._id, res);
+    await newUser.save();
+    res.status(201).json({ 
+      _id: newUser._id,
+      username: newUser.username,
+      email: newUser.email,
+      profileImage: newUser.profileImage,
+      bannerImage: newUser.bannerImage,
+     });
+  }else {
+    res.status(400).json({ message: "invalid user data" });
+  }
+ } catch (error) {
+    console.error("Error registering user:", error.message);
+    res.status(500).json({ message: "Error registering user", error });
+ }
 };
 
-// Sign In
-const signIn = async (req, res) => {
+// Controller function for user login
+
+export const login = async (req , res) => {
+  const { email , password } = req.body;
   try {
-    const { identifier, password } = req.body;
-
-    // Validate input
-    if (!identifier || !password) {
-      return res.status(400).json({ message: 'All fields are required.' });
-    }
-
-    // Find user by email or phone
-    const user = await User.findOne({
-      $or: [
-        { email: identifier },
-        { phone: identifier },
-      ],
-    });
-
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
+      return res.status(400).json({ message: "invalid credientials" })
     }
 
-    // Compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
+    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "invalid credientials" });
     }
 
-    // Simulate generating a token (replace with real JWT in production)
-    const token = `fake-jwt-token-for-${user._id}`;
+    generateToken(user._id,res)
 
     res.status(200).json({
-      message: 'Login successful.',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-      },
-      token,
-    });
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    })
+    
+
+
   } catch (error) {
-    console.error('Error during login:', error);
-    res.status(500).json({ message: 'Server error.', error: error.message });
+    console.error("Error logging in user:", error.message);
+    res.status(500).json({ message: "internal server error" });
   }
 };
 
-module.exports = { signIn, signUp };
+
+
+// Controller function for user logout
+export const logout =  (req , res) => {
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "logout successfully" });
+  } catch (error) {
+    console.log("Error logging out user:", error.message);
+    res.status(500).json({ message: "internal server error" });
+  }
+};
+
+
+
+// Controller function for user profile photo & banner update
+export const updateProfile = async (req, res) => {
+  try {
+    const { profileImage, bannerImage } = req.body;
+    const userId = req.user._id;
+
+    if (!profileImage && !bannerImage) {
+      return res.status(400).json({ message: "profile pics are required" });
+    }
+
+  const uploadResponse = await cloudinary.uploader.upload(profileImage && bannerImage);
+  const updatedUser = await User.findByIdAndUpdate(userId, {
+    profileImage: uploadResponse.secure_url,
+    bannerImage: uploadResponse.secure_url
+  }, { new: true });
+
+  res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log('Error updating profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+    
+  }
+};
+
+
+
+// Controller function for checking if user exists by username or ID
+export const checkAuth = (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log('Error checking user:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+
+  }
+};

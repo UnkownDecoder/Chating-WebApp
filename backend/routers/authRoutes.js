@@ -1,21 +1,25 @@
-const express = require('express');
-const bcrypt = require('bcryptjs'); // Ensure bcryptjs is installed
-const User = require('../models/userModel'); 
-const multer = require('multer');
-const authController = require("../controllers/authController");
+// authRoutes.js
+import express from "express";
+import multer from "multer";
+import {login , logout , signup } from "../controllers/authController.js"; // Ensure correct path and correct import
+import { ProtectRoute } from "../middleware/auth.middleware.js";
+import { updateProfile } from "../controllers/authController.js"
+import { checkAuth } from "../controllers/authController.js"
+
 const router = express.Router();
 
-// Multer setup
+// Multer setup for file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+
+
 // Routes
-router.post('/register', upload.fields([{ name: 'bannerImage' }, { name: 'profileImage' }]),authController.signUp);
+router.post("/signup", signup); 
+router.post("/login", login);
+router.post("/logout", logout);
 
-router.route('/login').post(authController.signIn);
+router.put("/update-profile", ProtectRoute ,updateProfile);
+router.get("/check", ProtectRoute , checkAuth);
 
-
-
-
-
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const express = require('express');
-const User = require('../models/userModel'); // Import User model
+import express from 'express';
+import User from '../models/userModel.js'; // Import User model using ES Modules
 
 const router = express.Router();
 
@@ -41,4 +41,4 @@ router.post('/AddFriends', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

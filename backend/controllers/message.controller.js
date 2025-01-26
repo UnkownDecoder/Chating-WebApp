@@ -1,9 +1,13 @@
+import User from "../models/userModel.js";
+import Message from "../models/message.model.js";
+
+
 export const getUsersForSideBar = async (req, res) => {
     try {
         const loggedInUserId = req.user._id;
-        const filterredUsers = await User.find({ _id: { $ne:loggedInUserId } }).select("-password");
+        const filteredUsers = await User.find({ _id: { $ne:loggedInUserId } }).select("-password");
 
-        res.status(200).json(filterUsers);
+        res.status(200).json(filteredUsers);
     } catch (error) {
         console.error('Error getting users for sidebar:', error.message);
         res.status(500).json({ message: 'Internal server error' });
@@ -13,12 +17,12 @@ export const getUsersForSideBar = async (req, res) => {
     export const getMessages = async (req, res) => {
         try {
            const {id:userToChatId}=req.params
-           const senderId=req.user._id;
+           const myId=req.user._id;
 
            const messages=await Message.find({
             $or: [
-                { sender: senderId, receiver: userToChatId },
-                { sender: userToChatId, receiver: senderId },
+                { senderId: myId, receiverId: userToChatId },
+                { senderId: userToChatId, receiverId: myId },
                 
             ]
         })
@@ -35,8 +39,9 @@ export const getUsersForSideBar = async (req, res) => {
 
             let imageUrl;
             if (image) {
-                const uploadImage = await cloudinary.uploader.upload(image);
-                imageUrl = uploadImage.secure_url;
+                // Upload image to cloudinary
+                const uploadResponse = await cloudinary.uploader.upload(image);
+                imageUrl = uploadResponse.secure_url;
             }
             const newMessage = new Message({
                 senderId,

@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa"; // Icons for toggli
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
 
 const Register = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -13,11 +14,12 @@ const Register = () => {
     phone: "",
     bio: "",
   });
+  
 
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
+  
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
@@ -99,7 +101,7 @@ const Register = () => {
         formDataToSend.append("bio", formData.bio);
         formDataToSend.append("password", formData.password);
 
-        const response = await fetch("http://localhost:5172/api/auth/register", {
+        const response = await fetch("http://localhost:5172/api/auth/signup", {
           method: "POST",
           body: formDataToSend,
         });

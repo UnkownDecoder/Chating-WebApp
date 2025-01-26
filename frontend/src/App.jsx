@@ -21,6 +21,11 @@ const App = () => {
 };
 
 const AppLayout = () => {
+//   const {authUser, checkAuth} = useAuthStore(); 
+//   useEffect(() => {
+//     checkAuth(); 
+//   } , [checkAuth]);
+//   console.log(authUser);
   const location = useLocation(); // Get current route location
 
   // Define routes where Header and Footer should not be shown

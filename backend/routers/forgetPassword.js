@@ -1,12 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
-const twilio = require('twilio');
-const User = require('../models/userModel'); 
-require('dotenv').config();
+import express from 'express';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+import twilio from 'twilio';
+import User from '../models/userModel.js';
+import dotenv from 'dotenv';
 
+dotenv.config(); // Load environment variables
+
+const router = express.Router();
 
 // Email configuration using Nodemailer
 const transporter = nodemailer.createTransport({
@@ -104,4 +106,4 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

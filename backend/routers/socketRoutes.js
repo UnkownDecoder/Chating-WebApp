@@ -1,6 +1,6 @@
-const socketController = require('../controllers/socketController');
+import socketController from '../controllers/socketController.js';
 
-module.exports = function(io) {
+export default function(io) {
   // Handle socket connection
   io.on('connection', (socket) => {
     console.log('New client connected');
@@ -26,5 +26,4 @@ module.exports = function(io) {
       socketController.handleDisconnect(socket); // Optional, if you want to handle disconnection logic
     });
   });
-};
-
+}

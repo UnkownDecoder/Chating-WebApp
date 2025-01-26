@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";  // Using ES6 import for mongoose
 
 const reviewSchema = new mongoose.Schema({
   username: { type: String, required: true },
@@ -6,4 +6,4 @@ const reviewSchema = new mongoose.Schema({
   review: { type: String, required: true },
 });
 
-module.exports = mongoose.model("Review", reviewSchema);
+export default mongoose.model("Review", reviewSchema);  // Using export default for the model
