@@ -5,19 +5,17 @@ import Flag from 'react-world-flags';
 
 const Settings = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('My Account'); // Set default active section to 'My Account'
-  const [searchQuery, setSearchQuery] = useState(''); // State to manage search query
-  const [selectedLanguage, setSelectedLanguage] = useState('English'); // Default selected language
-  const [selectedTheme, setSelectedTheme] = useState('Default Theme'); // Default selected theme
+  const [activeSection, setActiveSection] = useState('My Account');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
+  const [selectedTheme, setSelectedTheme] = useState('Default Theme');
 
   const handleBackClick = () => {
-    navigate('/chat'); // Navigate back to the Chat page
+    navigate('/chat');
   };
 
   const handleLogoutClick = () => {
-    // Add your logout logic here
     console.log('Logging out...');
-    // Navigate to Body component after logout
     navigate('/');
   };
 
@@ -61,7 +59,7 @@ const Settings = () => {
       case 'My Account':
         return (
           <div className="p-4">
-            <h3 className="text-2xl  font-semibold mb-4" style={{ width: '660px', height: '30px' }}>My Account</h3>
+            <h3 className="text-2xl font-semibold mb-4" style={{ width: '660px', height: '30px' }}>My Account</h3>
 
             <div className="p-4" style={{ width: '660px', height: '466.35px' }}>
               <div className="bg-gray-800 text-white p-4 rounded-t-lg mb-0" style={{ width: '660px', height: '100px' }}>
@@ -174,9 +172,9 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white">
       {/* Left Section */}
-      <div className="bg-gray-800 text-white p-4 flex flex-col justify-between" style={{ width: '250px' }}>
+      <div className="bg-gray-900 text-white p-4 flex flex-col justify-between w-1/4">
         <div className="flex flex-col mb-4">
           <div className="relative">
             <input
@@ -184,11 +182,10 @@ const Settings = () => {
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 pr-10 mb-4 border border-gray-300 bg-inherit hover:border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style={{ height: '35px', fontSize: '14px' }}
+              className="w-full p-2 pr-10 mb-4 border border-gray-600 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <FaSearch className="text-gray-500 " />
+              <FaSearch className="text-gray-500" />
             </div>
           </div>
           <div className="flex items-center mt-6">
@@ -221,10 +218,10 @@ const Settings = () => {
       </div>
 
       {/* Right Section */}
-      <div className="flex-grow flex flex-col bg-white p-4 relative">
+      <div className="flex-grow flex flex-col bg-gray-900 p-4 relative">
         <button
           onClick={handleBackClick}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-200"
         >
           <FaTimes className="text-2xl" />
           <span className="mt-2">ESC</span>
