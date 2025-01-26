@@ -9,6 +9,7 @@ const reviewRouter = require('./routers/reviewRouter');
 const userInfo = require('./routers/authUser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const FriendReq = require('./routers/authUser');
 const http = require('http');
 const socketIo = require('socket.io'); // Import socket.io
 
@@ -87,6 +88,7 @@ app.use('/api/reviews', reviewRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/forget', forgetPas);
 app.use('/api/user', userInfo);
+app.use('/api/AddFriends', FriendReq);
 
 // Socket.IO setup for real-time chat
 io.on('connection', (socket) => {
