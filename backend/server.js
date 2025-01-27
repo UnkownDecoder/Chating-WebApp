@@ -1,127 +1,77 @@
 import express from "express";
 import dotenv from "dotenv";
-import authRoutes from "./routers/authRoutes.js";
-import { connectDB } from "./library/db.js";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
-import messageRoutes from "./routers/message.routes.js";
-
-
 import cors from "cors";
 import bodyParser from "body-parser";
-
-import gridfs from "gridfs-stream";
 import multer from "multer";
-import forgetPas from './routers/forgetPassword.js';
-import reviewRouter from './routers/reviewRouter.js';
-import userInfo from './routers/authUser.js';
+import { connectDB } from "./library/db.js";
+import authRoutes from "./routers/authRoutes.js";
+import reviewRouter from "./routers/reviewRouter.js";
+import forgetPas from "./routers/forgetPassword.js";
+import userInfo from "./routers/authUser.js";
+// import FriendReq from "./routers/authUser.js";
+import { Server } from "socket.io";
+import http from "http";
 
-import FriendReq from './routers/authUser.js';
-import http from 'http';
-import { Server } from 'socket.io'; // Import socket.io
-
-
-dotenv.config(); // Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5172;
-const corsOptions = {
-  origin: "http://localhost:5173/",
-  methods: "GET,POST,PUT,DELETE,PATCH,HEAD",
-  credentials: true
-};
 
-// Middleware setup for parsing JSON requests before routing
-app.use(express.json()); // Important to parse JSON request bodies
-app.use(cookieParser()); // To parse cookies in requests
-app.use(cors(corsOptions));
-app.use(bodyParser.urlencoded({ extended: true })); // Optional, if you're handling URL-encoded data as well
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/reviews', reviewRouter);
-app.use('/api/forget', forgetPas);
-app.use('/api/user', userInfo);
-app.use('/api/AddFriends', FriendReq);
-app.use('/api/message', messageRoutes);
+// Multer setup
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
 
-// Connect to DB
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  connectDB();
+// API Endpoints
+app.use("/api/auth", upload.fields([{ name: "profileImage" }, { name: "bannerImage" }]), authRoutes);
+app.use("/api/reviews", reviewRouter);
+app.use("/api/forget", forgetPas);
+app.use("/api/user", userInfo);
+// app.use("/api/AddFriends", FriendReq);
+
+// Connect to MongoDB
+connectDB();
+
+// Start server
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
-
+// Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",  // Frontend origin
-    credentials: true,  // Enable credentials for cross-origin requests
+    origin: "http://localhost:5173",
+    credentials: true,
   },
-}); 
-// GridFS setup
-const conn = mongoose.connection;
-let gfs;
-conn.once('open', () => {
-  gfs = gridfs(conn.db, mongoose.mongo);
-  gfs.collection('uploads');
 });
 
-// Multer setup for handling file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
-// API endpoint to upload images
-app.post('/upload', upload.fields([{ name: 'bannerImage' }, { name: 'profileImage' }]), (req, res) => {
-  const files = req.files;
-  const bannerImage = files.bannerImage ? files.bannerImage[0] : null;
-  const profileImage = files.profileImage ? files.profileImage[0] : null;
-
-  const uploadImage = (file) => {
-    return new Promise((resolve, reject) => {
-      const writeStream = gfs.createWriteStream({
-        filename: file.originalname,
-        content_type: file.mimetype
-      });
-      writeStream.write(file.buffer);
-      writeStream.end();
-      writeStream.on('finish', () => resolve(writeStream.id));
-      writeStream.on('error', reject);
-    });
-  };
-
-  Promise.all([bannerImage ? uploadImage(bannerImage) : null, profileImage ? uploadImage(profileImage) : null])
-    .then(([bannerImageId, profileImageId]) => {
-      res.json({ bannerImageId, profileImageId });
-    })
-    .catch(err => {
-      console.error('Error uploading images:', err);
-      res.status(500).json({ message: 'Error uploading images' });
-    });
-});
-
-// Default route to check if the server is running
-app.get('/', (req, res) => {
-  res.send('Backend is working');
-});
-
-// Socket.IO setup for real-time chat
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  
-  // Listen for incoming messages from clients
-  socket.on('chat message', (msg) => {
-    console.log('Message received:', msg);
-    io.emit('chat message', msg); // Broadcast the message to all connected clients
+  socket.on("chat message", (msg) => {
+    io.emit("chat message", msg);
   });
 
-  // Listen for user typing events (optional)
-  socket.on('typing', (username) => {
-    socket.broadcast.emit('typing', username); // Notify others when someone is typing
-  });
-
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
   });
 });
 

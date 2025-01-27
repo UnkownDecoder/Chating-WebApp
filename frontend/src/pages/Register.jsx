@@ -302,6 +302,9 @@ const Register = () => {
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -324,6 +327,9 @@ const Register = () => {
               >
                 {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              )}
             </div>
 
             {/* Submit Button */}

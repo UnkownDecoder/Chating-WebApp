@@ -1,23 +1,49 @@
-// In your backend (e.g., userController.js)
-const User = require('../models/userModel'); // Assuming you have a User model
+import User from '../models/userModel.js'; // Assuming you have a User model
 
 // Function to check if user exists by username or ID
-async function checkUserExistence(req, res) {
-  const { identifier } = req.body; // username or user ID
-
+export const addFriend = async (req, res) => {
   try {
-    const user = await User.findOne({
-      $or: [{ username: identifier }, { id: identifier }], // Look up by 'username' or 'id'
-    });
+    const { senderId, identifier } = req.body;
 
-    if (user) {
-      return res.status(200).json({ success: true, user });
-    } else {
-      return res.status(404).json({ success: false, message: 'User not found.' });
+    console.log("Request Body:", req.body);
+
+    // Validate input
+    if (!senderId || !identifier) {
+      return res.status(400).json({ message: 'Both sender ID and receiver identifier are required!' });
     }
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-}
 
-module.exports = { checkUserExistence };
+    // Find sender in the database
+    const sender = await User.findOne({ id: senderId });
+    if (!sender) {
+      return res.status(404).json({ message: 'Sender not found!' });
+    }
+
+    // Find receiver in the database by username or user ID
+    const receiver = await User.findOne({ $or: [{ username: identifier }, { id: identifier }] });
+    if (!receiver) {
+      return res.status(404).json({ message: 'Receiver not found!' });
+    }
+
+    // Ensure the `friends` field is an array
+    if (!sender.friends) sender.friends = [];
+    if (!receiver.friends) receiver.friends = [];
+
+    // Check if they are already friends
+    if (sender.friends.includes(receiver._id)) {
+      return res.status(400).json({ message: 'You are already friends!' });
+    }
+
+    // Add each other as friends
+    sender.friends.push(receiver._id);
+    receiver.friends.push(sender._id);
+
+    // Save both users
+    await sender.save();
+    await receiver.save();
+
+    res.status(200).json({ message: 'Friend request accepted, and users are now friends!' });
+  } catch (error) {
+    console.error('Error adding friend:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
