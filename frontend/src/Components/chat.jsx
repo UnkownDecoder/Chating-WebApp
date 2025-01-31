@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { io } from 'socket.io-client';
+import axios from 'axios';
 import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog } from 'react-icons/fa';
 import { IoMdSend } from 'react-icons/io';
 import AddFriends from './AddFriends';
+import FriendRequests from './FriendRequests';
 
-const Chat = ({ userId }) => {
+const Chat = () => {
+
+  const [showAddFriend, setShowAddFriend] = useState(false);
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
@@ -13,25 +17,24 @@ const Chat = ({ userId }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [showPopup, setShowPopup] = useState(false);
-  const location = useLocation();
-  const [user, setUser] = useState({
-    username: location.state?.username || "Guest",
-    profileImage: location.state?.profileImage || "default-image-url",
-  });
-
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
   const [showAddFriendMessage, setShowAddFriendMessage] = useState(false);
   const [friendRequestMessage, setFriendRequestMessage] = useState('');
+  const [friends, setFriends] = useState([]);
 
-  const sidebarRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
   const textareaRef = useRef(null);
 
-  const navigate = useNavigate();
+  // Get user ID from localStorage
+  const userId = localStorage.getItem("userId") || '';
 
-  const muteAudio = new Audio('/sounds/mute.mp3');
-  const unmuteAudio = new Audio('/sounds/unmute.mp3');
+  const [user, setUser] = useState({
+    username: location.state?.username || "Guest",
+    profileImage: location.state?.profileImage || "default-image-url",
+  });
 
   useEffect(() => {
     const newSocket = io('http://localhost:5172');
@@ -39,13 +42,6 @@ const Chat = ({ userId }) => {
 
     newSocket.on('chat message', (msg) => {
       setMessages((prevMessages) => [...prevMessages, msg]);
-
-      if (location.state) {
-        setUser({
-          username: location.state.username,
-          profileImage: location.state.profileImage,
-        });
-      }
     });
 
     newSocket.on('typing', (username) => {
@@ -54,6 +50,20 @@ const Chat = ({ userId }) => {
 
     return () => newSocket.close();
   }, []);
+
+  // Fetch friends
+  useEffect(() => {
+    if (userId) fetchFriends();
+  }, [userId]);
+
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5172/api/user/friends/${userId}`);
+      setFriends(response.data.friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
+  };
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -76,12 +86,10 @@ const Chat = ({ userId }) => {
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    !isMuted ? muteAudio.play() : unmuteAudio.play();
   };
 
   const toggleDeafen = () => {
     setIsDeafened(!isDeafened);
-    !isDeafened ? muteAudio.play() : unmuteAudio.play();
   };
 
   const toggleFriendsView = () => {
@@ -93,19 +101,10 @@ const Chat = ({ userId }) => {
     navigate('/settings');
   };
 
-  const handleFriendRequestSend = () => {
-    console.log('Sending friend request:', friendRequestMessage);
-    setFriendRequestMessage('');
-  };
-
   return (
     <div className="flex h-screen bg-black">
       {/* Left Sidebar - Friends Section */}
-      <div
-        ref={sidebarRef}
-        style={{ width: `${sidebarWidth}px` }}
-        className="bg-gray-900 text-white p-4 flex flex-col justify-between"
-      >
+      <div style={{ width: `${sidebarWidth}px` }} className="bg-gray-900 text-white p-4 flex flex-col">
         <input
           type="text"
           value={searchQuery}
@@ -113,37 +112,47 @@ const Chat = ({ userId }) => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full p-2 mb-4 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white"
           placeholder="Find or Start Conversation"
-          style={{ height: '35px', fontSize: '14px' }}
         />
+
+        {/* Friends Button */}
         <button
           className="w-full py-2 mb-4 bg-transparent text-left text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
           onClick={toggleFriendsView}
         >
           Friends
         </button>
-        <div className="mt-auto flex items-center mb-4">
-          <img
-            src={user.profileImage}
-            alt="User"
-            className="rounded-full w-10 h-10 mr-3"
-          />
+
+        {/* Friends List */}
+        <div className="mt-2">
+          {friends.length > 0 ? (
+            friends.map((friend) => (
+              <div key={friend.id} className="flex items-center p-2 bg-gray-800 rounded-lg mb-2">
+                <img
+                  src={friend.profileImage || "default-image-url"}
+                  alt={friend.username}
+                  className="w-8 h-8 rounded-full mr-3"
+                />
+                <span className="text-white">{friend.username}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-sm">No friends added yet.</p>
+          )}
+        </div>
+
+        <div className="mt-auto flex items-center">
+          <img src={user.profileImage} alt="User" className="rounded-full w-10 h-10 mr-3" />
           <span className="text-white font-semibold">{user.username}</span>
           <div className="ml-auto flex space-x-4">
-            <div className="relative group">
-              <button className="text-white hover:text-gray-400" onClick={toggleMute}>
-                {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
-              </button>
-            </div>
-            <div className="relative group">
-              <button className="text-white hover:text-gray-400" onClick={toggleDeafen}>
-                {isDeafened ? <FaVolumeMute /> : <FaVolumeUp />}
-              </button>
-            </div>
-            <div className="relative group">
-              <button className="text-white hover:text-gray-400" onClick={handleSettingsClick}>
-                <FaCog />
-              </button>
-            </div>
+            <button className="text-white hover:text-gray-400" onClick={toggleMute}>
+              {isMuted ? <FaMicrophoneSlash /> : <FaMicrophone />}
+            </button>
+            <button className="text-white hover:text-gray-400" onClick={toggleDeafen}>
+              {isDeafened ? <FaVolumeMute /> : <FaVolumeUp />}
+            </button>
+            <button className="text-white hover:text-gray-400" onClick={handleSettingsClick}>
+              <FaCog />
+            </button>
           </div>
         </div>
       </div>
@@ -156,7 +165,6 @@ const Chat = ({ userId }) => {
             setShowAddFriendMessage={setShowAddFriendMessage}
             friendRequestMessage={friendRequestMessage}
             setFriendRequestMessage={setFriendRequestMessage}
-            handleFriendRequestSend={handleFriendRequestSend}
           />
         ) : (
           <div className="flex-grow p-4 overflow-y-auto">
@@ -192,29 +200,19 @@ const Chat = ({ userId }) => {
         )}
       </div>
 
-      {/* Right Sidebar - User Profile (conditionally render this section based on showFriends) */}
-      {!showFriends && (
-        <div className="bg-gray-900 text-white p-4 flex flex-col justify-between w-80">
-          <div className="flex items-center mb-4">
-            <img
-              src={user.profileImage}
-              alt="User"
-              className="rounded-full w-16 h-16 mr-4"
-            />
-            <div>
-              <span className="text-xl font-semibold">{user.username}</span>
-              <button className="mt-2 text-blue-500" onClick={handleSettingsClick}>Edit Profile</button>
-            </div>
-          </div>
 
-          <button
-            className="w-full py-2 mt-auto bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={handleSettingsClick}
-          >
-            Settings
-          </button>
-        </div>
-      )}
+      <div>
+      <div className="flex justify-between p-4 bg-gray-800">
+        <span className="text-xl font-semibold">Friends</span>
+        <button onClick={() => setShowAddFriend(!showAddFriend)} className="bg-green-500 text-white px-4 py-2 rounded-lg">
+          {showAddFriend ? 'Cancel' : 'Add Friend'}
+        </button>
+      </div>
+      
+      {showAddFriend ? <AddFriends /> : <FriendRequests userId={userId} />}
+    </div>
+
+
     </div>
   );
 };
