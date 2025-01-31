@@ -5,7 +5,7 @@ import cloudinary from '../library/cloudinary.js';
 import { generateToken } from '../library/utils.js';
 
 // Controller function for user registration
-        export const signup = async (req, res) => {
+export const signup = async (req, res) => {
   const { username, email, phone, birthdate, bio, password } = req.body;
  
  

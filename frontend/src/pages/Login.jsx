@@ -39,44 +39,48 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log("Form submitted:", formData);
       try {
         const response = await fetch("http://localhost:5172/api/auth/login", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
-
+  
         const result = await response.json();
         if (response.ok) {
           console.log("response ", result);
+  
+          // Store user ID and username in localStorage
+          localStorage.setItem("userId", result._id);
+          localStorage.setItem("username", result.username);
+          localStorage.setItem("profileImage", result.profileImage || "");
+  
           setErrorMessage(`Welcome, ${result.username || "User"}!`);
           setShowMessage(true);
+  
           setTimeout(() => {
             setShowMessage(false);
-            // Pass username and profileImage as state to the /chat route
             navigate("/chat", {
               state: {
                 username: result.username,
-                profileImage: result.profileImage || "default-image-url", // Default image if not present
+                profileImage: result.profileImage || "default-image-url",
               },
             });
-          }, 3000); // Show message for 3 seconds
+          }, 3000);
         } else {
           setErrorMessage(result.message || "Login failed");
           setShowMessage(true);
-          setTimeout(() => setShowMessage(false), 3000); // Show message for 3 seconds
+          setTimeout(() => setShowMessage(false), 3000);
         }
       } catch (error) {
         console.error("Error:", error);
         setErrorMessage("Login failed");
         setShowMessage(true);
-        setTimeout(() => setShowMessage(false), 3000); // Show message for 3 seconds
+        setTimeout(() => setShowMessage(false), 3000);
       }
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">

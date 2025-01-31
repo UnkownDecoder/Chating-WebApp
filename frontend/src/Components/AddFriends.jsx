@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import FriendRequests from './FriendRequests';
 
-const AddFriends = ({
-  showAddFriendMessage,
-  setShowAddFriendMessage,
-}) => {
-  const [receiverIdentifier, setReceiverIdentifier] = useState(''); // To store receiver's username or ID
-  const [isRequestSent, setIsRequestSent] = useState(false); // To track if the request was sent
-  const [loading, setLoading] = useState(false); // To handle loading state
-  const senderId = '978274'; // Replace this with the actual logged-in user's ID from context/auth
+const AddFriends = ({ showAddFriendMessage, setShowAddFriendMessage }) => {
+  const [receiverIdentifier, setReceiverIdentifier] = useState('');
+  const [isRequestSent, setIsRequestSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [filter, setFilter] = useState('all'); 
+
+  // Get the logged-in user's ID from localStorage
+  const senderId = localStorage.getItem("userId") || '';
+
+  useEffect(() => {
+    if (senderId) fetchFriends();
+  }, [senderId]);
+
+  const fetchFriends = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5172/api/user/friends/${senderId}`);
+      setFriends(response.data.friends);
+    } catch (error) {
+      console.error('Error fetching friends:', error);
+    }
+  };
 
   const sendFriendRequest = async () => {
     if (!receiverIdentifier.trim()) {
@@ -16,34 +31,27 @@ const AddFriends = ({
       return;
     }
 
-    setLoading(true); // Start loading when the request is sent
+    setLoading(true);
     try {
-      // Check if the user exists in the database by username or user ID
-      // Send the friend request
-        // Send the friend request
-        const friendRequestResponse = await axios.post("http://localhost:5172/api/user/AddFriends", {
-          senderId,
-          identifier: receiverIdentifier, // Send the receiver's username or user ID
-        });
-     
-        if (friendRequestResponse.status === 200) {
-          setIsRequestSent(true);
-          alert('Successfully sent friend request!');
-          setReceiverIdentifier(''); // Clear the receiver input field after sending
-          setShowAddFriendMessage(false); // Close the add friend form
-        }
-      
-    } catch (error) {
-      if (error.response?.status === 404) {
-        alert('User not found! Please check the username or ID.');
-      } else {
-        console.error('Error sending friend request:', error);
-        alert('Error sending friend request!');
+      const response = await axios.post('http://localhost:5172/api/user/AddFriends', {
+        senderId,
+        identifier: receiverIdentifier,
+      });
+
+      if (response.status === 200) {
+        setIsRequestSent(true);
+        alert('Friend request sent!');
+        setReceiverIdentifier('');
+        fetchFriends();
       }
+    } catch (error) {
+      alert('Error sending friend request!');
     } finally {
-      setLoading(false); // Stop loading after request is done
+      setLoading(false);
     }
   };
+
+  const filteredFriends = friends.filter(friend => (filter === 'all' ? true : friend.status === filter));
 
   return (
     <div>
@@ -66,18 +74,16 @@ const AddFriends = ({
           </button>
         </div>
       ) : (
-        <div className="flex justify-start items-center p-4 bg-gray-800 space-x-4">
-          <span className="font-semibold text-xl mr-4">Friends</span>
-          <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Online</button>
-          <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">All</button>
-          <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Pending</button>
-          <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg">Blocked</button>
-          <button
-            className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
-            onClick={() => setShowAddFriendMessage(true)}
-          >
-            Add Friend
-          </button>
+        <div className="flex flex-col p-4 bg-gray-800">
+          <div className="flex space-x-4 mb-4">
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('online')}>Online</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('all')}>All</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('pending')}>Pending</button>
+            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('blocked')}>Blocked</button>
+            <button className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg" onClick={() => setShowAddFriendMessage(true)}>Add Friend</button>
+          </div>
+
+          <FriendRequests/>
         </div>
       )}
     </div>

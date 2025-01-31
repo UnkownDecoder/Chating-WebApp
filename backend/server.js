@@ -9,7 +9,7 @@ import { connectDB } from "./library/db.js";
 import authRoutes from "./routers/authRoutes.js";
 import reviewRouter from "./routers/reviewRouter.js";
 import forgetPas from "./routers/forgetPassword.js";
-import userInfo from "./routers/authUser.js";
+import userInfo from "./routers/friendRoutes.js";
 // import FriendReq from "./routers/authUser.js";
 import { Server } from "socket.io";
 import http from "http";
