@@ -1,12 +1,14 @@
 import User from "../models/userModel.js";
 import Message from "../models/message.model.js";
 
+import cloudinary from "../library/cloudinary.js";
+import { getReciverSocketId, io } from "../library/socket.utils.js";
+
 
 export const getUsersForSideBar = async (req, res) => {
     try {
         const loggedInUserId = req.user._id;
         const filteredUsers = await User.find({ _id: { $ne:loggedInUserId } }).select("-password");
-
         res.status(200).json(filteredUsers);
     } catch (error) {
         console.error('Error getting users for sidebar:', error.message);
@@ -52,6 +54,10 @@ export const getUsersForSideBar = async (req, res) => {
             await newMessage.save();
 
             // real-time functionality goes here => socket.io
+            const receiverSocketId = getReciverSocketId(receiverId);
+            if(receiverSocketId){
+                io.to(receiverSocketId).emit("newMessage", newMessage);
+            }
 
             res.status(201).json(newMessage);
         } catch (error) {
