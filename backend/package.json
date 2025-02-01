@@ -32,5 +32,9 @@
     "socket.io": "^4.8.1",
     "three": "^0.172.0",
     "twilio": "^5.4.0"
+  },
+  "devDependencies": {
+    "@mswjs/interceptors": "^0.37.6",
+    "esbuild": "^0.24.2"
   }
 }
