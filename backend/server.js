@@ -11,7 +11,7 @@ import reviewRouter from "./routers/reviewRouter.js";
 import forgetPas from "./routers/forgetPassword.js";
 import userInfo from "./routers/friendRoutes.js";
 import messageRoutes from "./routers/message.routes.js"
-// import FriendReq from "./routers/authUser.js";
+import messageRoute from "./routers/message.routes.js";
 
 
 import { app,server } from "./library/socket.utils.js";
@@ -48,7 +48,7 @@ app.use("/api/reviews", reviewRouter);
 app.use("/api/forget", forgetPas);
 app.use("/api/user", userInfo);
 app.use("/api/messages", messageRoutes);
-// app.use("/api/AddFriends", FriendReq);
+app.use("/api/chat", messageRoute);
 
 // Connect to MongoDB
 

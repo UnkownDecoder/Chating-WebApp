@@ -6,6 +6,7 @@ import { getReciverSocketId, io } from "../library/socket.utils.js";
 
 
 export const getUsersForSideBar = async (req, res) => {
+    
     try {
         const loggedInUserId = req.user._id;
         const filteredUsers = await User.find({ _id: { $ne:loggedInUserId } }).select("-password");
@@ -20,6 +21,7 @@ export const getUsersForSideBar = async (req, res) => {
         try {
            const {id:userToChatId}=req.params
            const myId=req.user._id;
+         
 
            const messages=await Message.find({
             $or: [
