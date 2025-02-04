@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 export const generateToken = (userId, res) => {
 
 const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -12,5 +14,7 @@ const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
         secure: process.env.NODE_ENV !== "development",
 
     });
+
+    console.log("Token:== ", token);
     return token;
 };

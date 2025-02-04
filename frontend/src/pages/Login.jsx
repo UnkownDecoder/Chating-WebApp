@@ -54,6 +54,7 @@ const Login = () => {
           localStorage.setItem("userId", result._id);
           localStorage.setItem("username", result.username);
           localStorage.setItem("profileImage", result.profileImage || "");
+          localStorage.setItem("token", result.token);
   
           setErrorMessage(`Welcome, ${result.username || "User"}!`);
           setShowMessage(true);
@@ -64,6 +65,7 @@ const Login = () => {
               state: {
                 username: result.username,
                 profileImage: result.profileImage || "default-image-url",
+                token: result.token,
               },
             });
           }, 3000);

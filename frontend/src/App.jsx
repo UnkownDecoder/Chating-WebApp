@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./Components/Header";
 import Body from "./Components/Body";
 import Login from "./pages/Login";
@@ -13,19 +13,10 @@ import Settings from "./Components/Settings";
 import Developers from "./pages/Developers";
 
 const App = () => {
-  return (
-    <Router>
-      <AppLayout />
-    </Router>
-  );
+  return <AppLayout />;
 };
 
 const AppLayout = () => {
-//   const {authUser, checkAuth} = useAuthStore(); 
-//   useEffect(() => {
-//     checkAuth(); 
-//   } , [checkAuth]);
-//   console.log(authUser);
   const location = useLocation(); // Get current route location
 
   // Define routes where Header and Footer should not be shown
@@ -39,7 +30,7 @@ const AppLayout = () => {
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Body />} />
-          <Route path="/Reviews" element={<Reviews />} />
+          <Route path="/reviews" element={<Reviews />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/features" element={<Features />} />
@@ -57,4 +48,3 @@ const AppLayout = () => {
 };
 
 export default App;
-
