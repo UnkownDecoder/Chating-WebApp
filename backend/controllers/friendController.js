@@ -17,8 +17,10 @@ export const sendFriendRequest = async (req, res) => {
     const sender = await User.findOne({ _id: senderId });
     const receiver = await User.findOne({ $or: [{ username: identifier }, { id: identifier }] });
 
+    console.log("receiver:",receiver);
     if (!sender) return res.status(404).json({ message: 'Sender not found!' });
     if (!receiver) return res.status(404).json({ message: 'Receiver not found!' });
+
 
     // Check if they are already friends
     if (sender.friends.includes(receiver._id)) {
