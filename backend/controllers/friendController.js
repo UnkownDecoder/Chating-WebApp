@@ -1,4 +1,6 @@
 import User from '../models/userModel.js';
+import { userSocketMap } from "../library/socket.utils.js";
+
 
 // Send Friend Request
 export const sendFriendRequest = async (req, res) => {
@@ -132,3 +134,40 @@ export const getFriendsList = async (req, res) => {
       res.status(500).json({ message: "Error fetching friends", error });
     }
   };
+
+
+
+
+
+  
+
+export const getOnlineFriends = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        console.log("Requested userId:", userId);
+
+        // Find the user's friends
+        const user = await User.findById(userId).populate("friends");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!userSocketMap) {
+            return res.status(500).json({ message: "Online users data is unavailable" });
+        }
+
+        // Filter only online friends
+        const onlineFriends = user.friends.filter((friend) =>
+            userSocketMap.hasOwnProperty(friend._id.toString())
+        );
+
+        res.json({ friends: onlineFriends });
+    } catch (error) {
+        console.error("Error fetching online friends:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+ 
+
+

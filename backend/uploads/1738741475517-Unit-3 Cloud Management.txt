@@ -1,0 +1,331 @@
+Unit-3: Cloud Management:
+Tasks of Cloud Management:
+
+Auditing System Backups ​
+Flow of data in the system ​
+Vendor Lock-In
+Knowing provider’s security procedures ​
+Monitoring the Capacity, Planning, and Scaling abilities ​
+Monitoring audit log ​
+Solution Testing and Validation ​
+
+Cloud Storage Devices:
+
+Block-Based Storage System ​
+File-Based Storage System ​
+Object-Based Storage System ​
+
+Cloud Storage Classes:
+
+Unmanaged Cloud Storage ​
+Managed Cloud Storage ​
+
+Cloud Virtualization:
+
+Virtualization allows sharing physical resources among multiple users. ​
+Types of Virtualization:
+
+Grid Approach
+OS-Level Virtualization
+Hypervisor-based Virtualization
+
+
+
+Hypervisor:
+
+Types of Hypervisors:
+
+Type 1 (Bare Metal) ​
+Type 2 (Hosted) ​
+
+
+
+Types of Hardware Virtualization:
+
+Full Virtualization
+Emulation Virtualization
+Para-Virtualization
+//**********************************
+
+
+Basics of Planning and Deployment of Cloud ​
+
+Data Security and Privacy Requirement ​
+Budget Requirements
+Type of cloud - public, private, or hybrid ​
+Data backup requirements ​
+Training requirements
+Dashboard and reporting requirements ​
+Client access requirements ​
+Data export requirements ​
+
+
+
+Strategy Phase
+
+Computing Value Proposition ​
+Cloud Computing Strategy Planning ​
+
+
+
+Planning Phase
+
+Business Architecture Development ​
+IT Architecture Development ​
+Transformation Plan Development ​
+Requirements on Quality of Service Development ​
+
+
+
+Deployment Phase
+
+Selecting a cloud computing provider ​
+Maintenance and technical service ​
+
+
+
+Cloud Computing Technologies ​
+
+Virtualization
+Service-Oriented Architecture (SOA) ​
+Utility Computing
+
+
+
+Cloud Computing Architecture ​
+
+Frontend
+Backend
+
+
+
+Components of Cloud Computing Architecture ​
+
+Client Infrastructure
+Application
+Service (SaaS, PaaS, IaaS)
+Runtime Cloud
+Storage
+Infrastructure
+Management
+Security
+Internet
+
+
+
+Cloud Infrastructure Components ​
+
+Hypervisor
+Management Software
+Deployment Software
+Network
+Server
+Storage
+
+
+//*************************************
+Unit-1: Introduction to Cloud Computing ​
+Fundamentals of Cloud Computing ​
+
+Concepts of cloud and cloud computing ​
+Types of cloud based on deployment: Public, Private, Hybrid ​
+
+Cloud Service Models ​
+
+IaaS (Infrastructure as a Service) ​
+PaaS (Platform as a Service) ​
+SaaS (Software as a Service) ​
+Network as a Service ​
+Database as a Service ​
+
+Advantages of Cloud Computing ​
+
+Data Backup and Restoration ​
+Improved Collaboration
+Excellent Accessibility
+Cost-effective Maintenance
+Upkeep and Updates ​
+Mobility
+Pay-per-use Model
+Scalable Storage Capacity ​
+Enhanced Data Security ​
+Disaster Recovery and Business Continuity ​
+Agility and Innovation ​
+Green Computing
+
+Disadvantages of Cloud Computing ​
+
+Performance Can Vary ​
+Technical Issues
+Security Threat in the Cloud ​
+Downtime
+Internet Connectivity
+Lower Bandwidth
+Lack of Support ​
+
+Cloud Computing Architecture ​
+
+Front End: Client-side interfaces and applications ​
+Back End: Service provider's resources and management ​
+
+Components of Cloud Computing Architecture ​
+
+Client Infrastructure
+Application
+Runtime Cloud
+Storage
+Infrastructure
+Service
+Management
+Security
+Internet
+
+Basic Concepts
+
+Deployment Models: Public, Private, Hybrid, Community
+Service Models: IaaS, PaaS, SaaS ​
+
+Types of Cloud Based on Deployment ​
+
+Public Cloud
+Private Cloud
+Hybrid Cloud
+
+Cloud Service Model ​
+
+Infrastructure as a Service (IaaS) ​
+
+Characteristics: Scalable, flexible, GUI and API-based access ​
+Examples: AWS, Microsoft Azure, Google Compute Engine ​
+
+
+Platform as a Service (PaaS) ​
+
+Characteristics: Supports multiple languages, auto-scale, integrates with web services ​
+Examples: AWS Elastic Beanstalk, Google App Engine, Heroku ​
+
+
+Software as a Service (SaaS) ​
+
+Characteristics: Managed centrally, accessible over the internet, automatic updates ​
+Examples: Google Apps, Salesforce, Dropbox ​
+
+
+
+Network as a Service (NaaS) ​
+
+Provides network infrastructure directly and securely ​
+Uses virtualized network infrastructure ​
+
+Database as a Service (DBaaS) ​
+
+Provides access to a database without physical setup ​
+Examples: Amazon RDS, Azure SQL Database, MongoDB Atlas ​
+
+//********************************
+Here are the important notes from the document:
+
+
+Security Boundaries in Cloud Computing: ​
+
+Data should be stored in encrypted form. ​
+Use proxy and brokerage services to restrict direct access to shared data. ​
+Analyze resource sensitivity to risk before moving to the cloud. ​
+Understand responsibilities in different cloud service models (IaaS, PaaS, SaaS). ​
+Consider the type of cloud (public, private, community, hybrid). ​
+Understand the cloud service provider's data storage and transfer systems. ​
+
+
+
+Cloud Security Alliance (CSA) Model: ​
+
+Defines boundaries between service models and responsibilities. ​
+IaaS provides infrastructure, PaaS provides platform development, and SaaS provides the operating environment. ​
+Security concerns and capabilities are inherited upwards from IaaS to SaaS. ​
+Customers are responsible for security below the defined boundary. ​
+
+
+
+Cloud Operations and Management: ​
+
+Cloud operations allow performing business operations over the Internet. ​
+Use the right tools and resources, standardize and automate processes, and maintain service quality. ​
+Efficient processes eliminate waste and redundancy. ​
+
+
+
+Cloud Applications: ​
+
+Business Applications: MailChimp, Chatter, Google Apps for Business, Quickbooks. ​
+Data Storage and Backup Applications: Box.com, Mozy, Joukuu.
+Education Applications: Google Apps for Education, Chromebooks for Education, Tablets with Google Play for Education, AWS in Education.
+Entertainment Applications: Online games (Shaow, GeForce Now, Vortex, Project xCloud, PlayStation Now), Video conferencing apps. ​
+Management Applications: Toggl, Evernote, Outright.
+Social Applications: Facebook, Twitter. ​
+
+
+
+These notes summarize the key points related to cloud security, operations, and various applications as discussed in the document. ​
+
+//**************************************
+Important Notes:
+
+
+Big Data Concepts: ​
+
+Big Data refers to datasets that are too large and complex for traditional data processing systems. ​
+Characteristics include Volume, Velocity, and Variety. ​
+Sources include social media, sensors, internet activity, and mobile devices. ​
+
+
+
+Sources of Big Data: ​
+
+Social Media: Activities on platforms like Facebook, Twitter, etc. ​
+Sensors: Data from temperature, humidity sensors, traffic cameras, security cameras. ​
+Customer Feedback: Data from e-commerce sites, telecom companies. ​
+E-commerce: Transaction data from online shopping, banking. ​
+GPS: Data from vehicle movements. ​
+IoT Appliances: Data from smart devices like TVs, washing machines. ​
+
+
+
+Big Data vs. Traditional Database:
+
+Big Data is generated outside the enterprise, has larger volumes, and includes structured, semi-structured, and unstructured data. ​
+Traditional databases handle smaller, structured data volumes and are easier to manage.
+
+
+
+Data Warehouse Concepts: ​
+
+A Data Warehouse (DW) is a relational database designed for query and analysis, not transaction processing. ​
+It provides integrated, historical data for decision-making. ​
+Architecture includes Bottom Tier (Data Warehouse Server), Middle Tier (OLAP Server), and Top Tier (Front-end Tools). ​
+
+
+
+Data Processing Techniques: ​
+
+OLAP (Online Analytical Processing): Used for complex queries and multidimensional analysis. ​
+OLTP (Online Transaction Processing): Used for executing multiple transactions simultaneously. ​
+
+
+
+Data Lake Concepts: ​
+
+A Data Lake is a centralized repository for storing structured and unstructured data. ​
+It supports real-time analytics, machine learning, and does not require a predefined schema. ​
+Architecture includes Source Layer, Data Processing Layer, and Target Layer. ​
+
+
+
+Data Lake vs. Data Warehouse: ​
+
+Data Lakes store raw, unstructured data and support schema-on-read. ​
+Data Warehouses store structured data and use schema-on-write.
+Data Lakes are more scalable and cost-efficient, while Data Warehouses offer high performance for structured queries.
+
+
+
+These notes provide a concise overview of the key concepts and differences related to Big Data, Data Warehouses, and Data Lakes.
