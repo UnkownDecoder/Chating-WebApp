@@ -35,12 +35,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Multer setup
 const storage = multer.diskStorage({
-  destination: "uploads/",
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
-const upload = multer({ storage });
+
+// Accept all file types
+const fileFilter = (req, file, cb) => {
+  cb(null, true);
+};
+
+const upload = multer({ storage, fileFilter });
 
 // API Endpoints
 app.use("/api/auth", upload.fields([{ name: "profileImage" }, { name: "bannerImage" }]), authRoutes);
