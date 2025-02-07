@@ -191,7 +191,7 @@ const Chat = () => {
         ) : (
           <div className="flex-grow flex flex-col">
             {/* 👇 ChatHeader ko add kiya */}
-            {selectedFriendId && <ChatHeader />}
+            {selectedFriendId && <ChatHeader /> }
 
             {/* 👇 Chat messages display area */}
             <div className="flex-grow p-4 overflow-y-auto flex flex-col space-y-2">
