@@ -1,13 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'; // Add useRef
+import { Send, Image, X } from 'lucide-react';  // Add Image and X
 import { useChatStore } from '../store/useChatStore';
-import { Send } from 'lucide-react';
+
 import toast from 'react-hot-toast';
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview , setImagePreview] = useState(null);
-    const fileInputRef = userRef(null);
-    const { sendMessage } = useChatStore();
+    const fileInputRef = useRef(null);
+    const useChatStore = create((set) => ({
+        sendMessage: async (message) => {
+          // API call to send message
+          const response = await axios.post('http://localhost:5172/api/messages', message);
+          set((state) => ({ messages: [...state.messages, response.data] }));
+        },
+      }));
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -46,6 +53,11 @@ const MessageInput = () => {
             }
     };
 
+    if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+
   return (
     <div className="p-4 w-full">
         {imagePreview && (
@@ -81,10 +93,11 @@ const MessageInput = () => {
              />
              <button
              type='button'
+             aria-label="Attach image"
              className={`hidden sm:flex btn btn-circle ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
              onClick={() => fileInputRef.current?.click()}
              >
-                <image size={20} />
+                <Image size={20} />
              </button>
             </div>
             <button
