@@ -11,7 +11,7 @@ const Settings = () => {
   const [selectedTheme, setSelectedTheme] = useState('Default Theme');
 
   const handleBackClick = () => {
-    navigate('/chat');
+    window.history.back();
   };
 
   const handleLogoutClick = () => {

@@ -4,7 +4,6 @@ import FriendRequests from './FriendRequests';
 
 const AddFriends = ({ showAddFriendMessage, setShowAddFriendMessage }) => {
   const [receiverIdentifier, setReceiverIdentifier] = useState('');
-  const [isRequestSent, setIsRequestSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [friends, setFriends] = useState([]);
   const [filter, setFilter] = useState('all'); 
@@ -16,15 +15,32 @@ const AddFriends = ({ showAddFriendMessage, setShowAddFriendMessage }) => {
     if (senderId) fetchFriends();
   }, [senderId]);
 
-  const fetchFriends = async () => {
+  // Fetch friends list
+  const fetchFriends = async (isOnlineOnly = false) => {
     try {
-      const response = await axios.get(`http://localhost:5172/api/user/friends/${senderId}`);
-      setFriends(response.data.friends);
+      let url = `http://localhost:5172/api/user/friends/${senderId}`;
+      if (isOnlineOnly) {
+        url = `http://localhost:5172/api/user/online-friends/${senderId}`;
+      }
+      
+      const response = await axios.get(url);
+      
+      // If fetching online friends, add the "status" field
+      const friendsWithStatus = response.data.friends.map(friend => {
+        if (isOnlineOnly) {
+          return { ...friend, status: "online" }; // Only add "status" for online friends
+        }
+        return friend; // Keep original object for "All" friends
+      });
+  
+      setFriends(friendsWithStatus);
     } catch (error) {
-      console.error('Error fetching friends:', error);
+      console.error("Error fetching friends:", error);
     }
   };
-
+  
+  
+  // Send friend request
   const sendFriendRequest = async () => {
     if (!receiverIdentifier.trim()) {
       alert('Please enter a valid username or user ID!');
@@ -39,10 +55,9 @@ const AddFriends = ({ showAddFriendMessage, setShowAddFriendMessage }) => {
       });
 
       if (response.status === 200) {
-        setIsRequestSent(true);
         alert('Friend request sent!');
         setReceiverIdentifier('');
-        fetchFriends();
+        fetchFriends(); // Refresh friends list
       }
     } catch (error) {
       alert('Error sending friend request!');
@@ -51,7 +66,14 @@ const AddFriends = ({ showAddFriendMessage, setShowAddFriendMessage }) => {
     }
   };
 
-  const filteredFriends = friends.filter(friend => (filter === 'all' ? true : friend.status === filter));
+  // Filter friends list based on selection
+  const filteredFriends = friends.filter(friend => {
+    if (filter === 'all') return true;
+    if (filter === 'online') return friend.status === 'online';
+    if (filter === 'pending') return friend.status === 'pending';
+    if (filter === 'blocked') return friend.status === 'blocked';
+    return true;
+  });
 
   return (
     <div>
@@ -75,15 +97,74 @@ const AddFriends = ({ showAddFriendMessage, setShowAddFriendMessage }) => {
         </div>
       ) : (
         <div className="flex flex-col p-4 bg-gray-800">
+          {/* Filter Buttons */}
           <div className="flex space-x-4 mb-4">
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('online')}>Online</button>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('all')}>All</button>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('pending')}>Pending</button>
-            <button className="p-2 bg-transparent hover:bg-gray-700 rounded-lg" onClick={() => setFilter('blocked')}>Blocked</button>
-            <button className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg" onClick={() => setShowAddFriendMessage(true)}>Add Friend</button>
+          <button 
+  className={`p-2 rounded-lg ${filter === 'online' ? 'bg-gray-700' : 'bg-transparent'} hover:bg-gray-700`}
+  onClick={() => {
+    setFilter('online');
+    fetchFriends(true); // Fetch only online friends
+  }}
+>
+  Online
+</button>
+<button 
+  className={`p-2 rounded-lg ${filter === 'all' ? 'bg-gray-700' : 'bg-transparent'} hover:bg-gray-700`}
+  onClick={() => {
+    setFilter('all');
+    fetchFriends(false); // Fetch all friends
+  }}
+>
+  All
+</button>
+
+            <button 
+              className={`p-2 rounded-lg ${filter === 'pending' ? 'bg-gray-700' : 'bg-transparent'} hover:bg-gray-700`}
+              onClick={() => setFilter('pending')}
+            >
+              Pending
+            </button>
+            <button 
+              className={`p-2 rounded-lg ${filter === 'blocked' ? 'bg-gray-700' : 'bg-transparent'} hover:bg-gray-700`}
+              onClick={() => setFilter('blocked')}
+            >
+              Blocked
+            </button>
+            <button 
+              className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
+              onClick={() => setShowAddFriendMessage(true)}
+            >
+              Add Friend
+            </button>
           </div>
 
-          <FriendRequests/>
+          {/* Conditionally show Friend Requests if 'Pending' is selected */}
+          {filter === 'pending' && <FriendRequests userId={senderId} />}
+
+          {/* Display Friends List */}
+          {filter !== 'pending' && (
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold text-white mb-2">{filter === 'all' ? 'All Friends' : `${filter.charAt(0).toUpperCase() + filter.slice(1)} Friends`}</h2>
+              {filteredFriends.length > 0 ? (
+                filteredFriends.map((friend) => (
+                  <div key={friend._id} className="flex items-center p-2 bg-gray-800 rounded-lg mb-2">
+                    <img
+                      src={friend.profileImage || "default-image-url"}
+                      alt={friend.username}
+                      className="w-8 h-8 rounded-full mr-3"
+                    />
+                    <span className="text-white">{friend.username}</span>
+                    {filter === 'online' && (
+  <span className="ml-auto text-sm text-green-400">Online</span>
+)}
+
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm">No {filter !== 'all' ? filter : ''} friends found.</p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

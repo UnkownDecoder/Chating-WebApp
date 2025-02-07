@@ -1,0 +1,94 @@
+*Advantages of MANET:-(Mobile Ad hoc Network)
+-Flexibility
+-Scalability
+-Cost-Effective
+-Rapid Deployment
+
+*Disadvantages
+-security
+-Reliability
+-Routing
+-Power Consumption
+
+*VANET(Vehicular Ad hoc Network)
+*Applications
+-Intelligent Transportation System(ITS)
+-Road Safety
+-Entertainment Services
+-Commercial Services
+
+*Features
+-Safety
+-Traffic management
+-Driver assistance systems
+-Pricing and payments
+-Direction and route optimization
+
+*Smart Phone Ad hoc Network(SPANC)
+*Applications
+-Emergency communication
+-Event networking
+-Military and emergency services
+-Content sharing
+-Research and development
+-Crowdsourcing
+-Advertising and marketing
+
+*Flying Ad hoc Network(FANET)
+*Applications
+-Military and defense
+-Emergency response
+-Civil aviation
+-Environmental monitoring
+-Agriculture
+-Search and rescue
+-Infrastructure inspection
+-Media and Entertainment
+
+
+*OSI Model (Open system interconnection)
+*characteristics of OSI
+-Application
+ *functions of Application layer
+     1)file transfer, access and management
+     2)Mail services
+     3)Directory services
+-Presentation
+ *functions of Presentation layer
+     1)Translation
+     2)Encryption
+     3)Compression
+-Session
+*functions of Session layer
+     1)Dialog control
+     2)Synchronization
+     
+-Transport
+*protocols in transport layer
+  1)TCP
+  2)UDP
+*
+ *functions of Transport layer
+    1)Service-point addressing
+    2)Segmentation and reassembly
+    3)Connection control
+    4)Flow control
+    5)Error control
+-Network
+*functions of Network layer
+    1)Internetworking
+    2)Addressing
+    3)Routing
+    4)Packetizing
+   
+
+-Datalink
+ *functions of Datalink layer
+    1)Physical Addressing
+    2)Flow control
+    3)Error control
+    4)Access Control
+-Physical
+
+
+ 
