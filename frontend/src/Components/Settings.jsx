@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { FaSearch, FaSignOutAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
+import { useAuthStore } from "../store/useAuthStore"; // Adjust path
 
 const Settings = () => {
   const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout); // Get logout function
   const [activeSection, setActiveSection] = useState('My Account');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
@@ -14,10 +16,16 @@ const Settings = () => {
     window.history.back();
   };
 
-  const handleLogoutClick = () => {
-    console.log('Logging out...');
-    navigate('/');
+  const handleLogoutClick = async () => {
+    try {
+      console.log("Logging out...");
+      await logout(); // Call logout function from store
+      navigate("/"); // Redirect to home after logout
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
+
 
   const languages = [
     { name: 'English', code: 'US', country: 'United States' },

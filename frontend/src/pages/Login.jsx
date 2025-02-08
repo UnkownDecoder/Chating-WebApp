@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for password visibility toggle
 import { useNavigate } from "react-router-dom"; // For navigation
+import { useAuthStore } from "../store/useAuthStore"; 
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ const Login = () => {
     password: "",
   });
 
+  const login = useAuthStore((state) => state.login); 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false); // For toggling password visibility
   const [errorMessage, setErrorMessage] = useState("");
@@ -38,51 +40,41 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:5172/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-  
-        const result = await response.json();
-        if (response.ok) {
-          console.log("response ", result);
-  
-          // Store user ID and username in localStorage
-          localStorage.setItem("userId", result._id);
-          localStorage.setItem("username", result.username);
-          localStorage.setItem("profileImage", result.profileImage || "");
-          localStorage.setItem("token", result.token);
-  
-          setErrorMessage(`Welcome, ${result.username || "User"}!`);
+        await login(formData); // Call Zustand's login function
+
+        // Get user from state after successful login
+        const authUser = useAuthStore.getState().authUser;
+        if (authUser) {
+          setErrorMessage(`Welcome, ${authUser.username || "User"}!`);
           setShowMessage(true);
-  
+           // Store user ID and username in localStorage
+           localStorage.setItem("userId", authUser._id);
+           localStorage.setItem("username", authUser.username);
+           localStorage.setItem("profileImage", authUser.profileImage || "");
+           localStorage.setItem("token", authUser.token);
+
           setTimeout(() => {
             setShowMessage(false);
             navigate("/chat", {
               state: {
-                username: result.username,
-                profileImage: result.profileImage || "default-image-url",
-                token: result.token,
+                username: authUser.username,
+                profileImage: authUser.profileImage || "default-image-url",
+                token: authUser.token,
               },
             });
           }, 3000);
-        } else {
-          setErrorMessage(result.message || "Login failed");
-          setShowMessage(true);
-          setTimeout(() => setShowMessage(false), 3000);
         }
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Login error:", error);
         setErrorMessage("Login failed");
         setShowMessage(true);
         setTimeout(() => setShowMessage(false), 3000);
       }
     }
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">

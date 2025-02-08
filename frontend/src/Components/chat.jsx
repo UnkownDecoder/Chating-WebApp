@@ -6,6 +6,8 @@ import { FaPaperclip } from 'react-icons/fa';
 import { IoMdSend } from 'react-icons/io';
 import AddFriends from './AddFriends';
 import Sidebar from './Sidebar';
+import ChatContainer from "./ChatContainer";
+import { useChatStore } from "../store/useChatStore"; // Import Zustand store
 
 const Chat = () => {
   const [socket, setSocket] = useState(null);
@@ -18,6 +20,7 @@ const Chat = () => {
   const [friends, setFriends] = useState([]);
   const [selectedFriendId, setSelectedFriendId] = useState(null);
   const [selectedFriendName, setSelectedFriendName] = useState('');
+  const [selectedFriendProfile, setSelectedFriendProfile] = useState('');
   const [friendMessages, setFriendMessages] = useState([]);
   const [file, setFile] = useState(null);
 
@@ -57,23 +60,32 @@ const Chat = () => {
 
 
 
+  const socketRef = useRef(null);
+
   useEffect(() => {
-    const newSocket = io('http://localhost:5172', {
-      query: { userId: userId },
-    });
-    setSocket(newSocket);
-    newSocket.emit('register', userId);
-    newSocket.on('newMessage', (msg) => {
+    if (!socketRef.current) {
+      socketRef.current = io('http://localhost:5172', { query: { userId } });
+      socketRef.current.emit('register', userId);
+    }
+  
+    const socket = socketRef.current;
+  
+    socket.on('newMessage', (msg) => {
       if (msg.receiverId === selectedFriendId || msg.senderId === selectedFriendId) {
         setFriendMessages((prevMessages) => [...prevMessages, msg]);
       }
     });
-    newSocket.on('typing', (username) => {
+  
+    socket.on('typing', (username) => {
       setTyping(`${username} is typing...`);
     });
-    return () => newSocket.close();
+  
+    return () => {
+      socket.off('newMessage');
+      socket.off('typing');
+    };
   }, [selectedFriendId, userId]);
-
+  
   useEffect(() => {
     if (userId) {
       console.log("User ID exists, fetching data:", userId);
@@ -89,6 +101,7 @@ const Chat = () => {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem("token"); // Retrieve token
+    
       if (!token) throw new Error("No token found");
   
       const response = await axios.get(`http://localhost:5172/api/chat/${userId}`, {
@@ -123,123 +136,62 @@ const handleSendMessage = async () => {
 
   if ((message.trim() || file) && selectedFriendId) {
     const formData = new FormData();
-    formData.append('from', userId);
-    formData.append('to', selectedFriendId);
-    formData.append("text", message);
+    formData.append('text', message);
     if (file) formData.append('file', file);
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `http://localhost:5172/api/chat/send/${selectedFriendId}`,
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+    useChatStore.getState().sendMessage({
+      text: message,
+      image: file,
+    });
 
-      const newMessage = response.data;
-
-      // **Update messages instantly for sender**
-      setFriendMessages((prevMessages) => [...prevMessages, newMessage]);
-
-      // **Emit message to receiver**
-      socket.emit('newMessage', newMessage);
-
-      // **Clear input fields**
-      setMessage('');
-      setFile(null);
-
-    } catch (error) {
-      console.error("Error sending message:", error);
-      if (error.response?.status === 401) {
-        window.location.href = "/login";
-      }
-    }
+    // **Clear input fields after sending**
+    setMessage('');
+    setFile(null);
   }
 };
 
 
 
-  const handleFriendSelect = (friendId, friendName) => {
-    setSelectedFriendId(friendId);
-    setSelectedFriendName(friendName);
-    setFriendMessages([]);
-  };
+
+const handleFriendSelect = (friendId, friendName, friendProfile) => {
+  setSelectedFriendId(friendId);
+  setSelectedFriendName(friendName);
+  setSelectedFriendProfile(friendProfile);
+
+  useChatStore.getState().setSelectedUser({
+    _id: friendId,
+    username: friendName,
+    profileImage: friendProfile,
+  });
+
+  // Fetch previous messages when selecting a user
+  useChatStore.getState().getMessages(friendId);
+};
+
 
   return (
     <div className="flex h-screen bg-black">
     
    
-  <Sidebar user={user} friends={friends} onFriendSelect={handleFriendSelect} toggleFriendsView={toggleFriendsView}/>
+    <Sidebar 
+  user={user} 
+  friends={friends} 
+  onFriendSelect={handleFriendSelect} 
+  toggleFriendsView={toggleFriendsView} 
+/>
+
+<ChatContainer 
+  messages={friendMessages} 
+  typing={typing}
+  selectedFriend={{ 
+    id: selectedFriendId, 
+    name: selectedFriendName, 
+    profile: selectedFriendProfile 
+  }}
+  onSendMessage={handleSendMessage}
+/>
 
  
-
-      <div className="flex-grow flex flex-col bg-gray-900 text-white border-l-2 border-r-2 border-gray-700">
-        {showFriends ? (
-          <AddFriends
-            showAddFriendMessage={showAddFriendMessage}
-            setShowAddFriendMessage={setShowAddFriendMessage}
-            friendRequestMessage={friendRequestMessage}
-            setFriendRequestMessage={setFriendRequestMessage}
-          />
-        ) : (
-          <div className="flex-grow p-4 overflow-y-auto flex flex-col space-y-2">
-  {selectedFriendId ? (
-    <div className="flex flex-col space-y-2">
-      {friendMessages.length > 0 ? (
-        friendMessages.map((msg, index) => (
-          <div 
-            key={index} 
-            className={`flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}
-          >
-            <div 
-              className={`p-3 rounded-lg max-w-xs mb-2 ${msg.senderId === userId ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white'}`}
-            >
-              <p>{msg.text || 'No message content'}</p>
-              {msg.image && (
-                <a href={msg.image} target="_blank" rel="noopener noreferrer" className="text-blue-300 mt-1">Download File</a>
-              )}
-            </div>
-          </div>
-        ))
-      ) : (
-        <div className="text-gray-400 text-center">Start a conversation with this friend.</div>
-      )}
-    </div>
-  ) : (
-    <div className="text-gray-400 text-center">Select a friend to chat with.</div>
-  )}
-</div>
-
-
-        )}
-        {typing && <div className="p-2 text-gray-400 italic">{typing}</div>}
-        {!showFriends && selectedFriendId && (
-           <div className="p-4 bg-gray-800 flex items-center">
-      <textarea
-        ref={textareaRef}
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        className="w-full p-2 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-900 text-white"
-        placeholder={`Type a message to ${selectedFriendName}`}
-        rows={1}
-      />
-      
-      {/* File Upload */}
-      <label htmlFor="file-upload" className="ml-2 cursor-pointer">
-        <FaPaperclip size={24} className="text-white hover:text-gray-400" />
-      </label>
-      <input id="file-upload" type="file" onChange={handleFileChange} className="hidden" />
-
-      {/* Send Button */}
-      <button onClick={handleSend} className="ml-2 bg-blue-600 text-white p-2 rounded-lg flex items-center justify-center hover:bg-purple-600">
-        <IoMdSend size={24} />
-      </button>
-    </div>
-        )}
-      </div>
     </div>
   );
 };

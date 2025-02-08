@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect,useRef } from "react"
 import { useChatStore } from '../store/useChatStore';
 import { Send } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview , setImagePreview] = useState(null);
-    const fileInputRef = userRef(null);
+    const fileInputRef = useRef(null);
     const { sendMessage } = useChatStore();
 
     const handleImageChange = (e) => {
@@ -84,7 +84,7 @@ const MessageInput = () => {
              className={`hidden sm:flex btn btn-circle ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
              onClick={() => fileInputRef.current?.click()}
              >
-                <image size={20} />
+                <img size={20} />
              </button>
             </div>
             <button

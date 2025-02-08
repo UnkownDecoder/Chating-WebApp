@@ -8,6 +8,15 @@ import { useAuthStore } from "../store/useAuthStore";
 const ChatHeader = () => {
     const { selectedUser, setSelectedUser } =  useChatStore();
     const { onlineUsers } = useAuthStore();
+
+
+    if (!selectedUser) {
+        return (
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-semibold">No User Selected</h2>
+          </div>
+        );
+      }
   return (
    <div className="p-2.5 border-b border-base-300">
     <div className="flex items-center justify-between">

@@ -2,6 +2,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa"; // Icons for toggling visibility and removing images
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
+import { useAuthStore } from "../store/useAuthStore"; 
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +18,7 @@ const Register = () => {
   
 
   const navigate = useNavigate();
+  const signUp = useAuthStore((state) => state.signUp);
 
   const [errors, setErrors] = useState({});
   
@@ -88,12 +90,13 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
       setLoading(true);
       try {
         const formDataToSend = new FormData();
-        formDataToSend.append("bannerImage", bannerImage); // Append the file, not the state variable
-        formDataToSend.append("profileImage", profileImage); // Append the file, not the state variable
+        formDataToSend.append("bannerImage", bannerImage);
+        formDataToSend.append("profileImage", profileImage);
         formDataToSend.append("username", formData.username);
         formDataToSend.append("email", formData.email);
         formDataToSend.append("phone", formData.phone);
@@ -101,22 +104,16 @@ const Register = () => {
         formDataToSend.append("bio", formData.bio);
         formDataToSend.append("password", formData.password);
 
-        const response = await fetch("http://localhost:5172/api/auth/signup", {
-          method: "POST",
-          body: formDataToSend,
-        });
+        await signUp(formDataToSend); // Call Zustand's signUp function
 
-        const result = await response.json();
-        if (response.ok) {
-          alert("Registration successful");
-          setSuccessMessage("Registration successful!");
-          navigate('/login');
-        } else {
-          alert(result.message || "Registration failed");
-        }
+        // Show success message and navigate
+        setSuccessMessage("Registration successful!");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       } catch (error) {
-        console.error("Error:", error);
-        alert("Registration failed");
+        console.error("Signup error:", error);
+        alert("Signup failed");
       } finally {
         setLoading(false);
         setFormData({
@@ -133,6 +130,7 @@ const Register = () => {
       }
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">
       <div className="w-full max-w-4xl flex space-x-8">

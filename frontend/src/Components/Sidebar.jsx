@@ -23,7 +23,7 @@ const Sidebar = ({ user, friends, onFriendSelect, toggleFriendsView }) => {
   const handleSettingsClick = () => navigate("/settings");
 
   return (
-    <div className="w-64 bg-gray-900 text-white p-4 flex flex-col">
+    <aside className="w-64 bg-gray-900 text-white p-4 flex flex-col">
       {/* Search Bar */}
       <input
         type="text"
@@ -50,7 +50,7 @@ const Sidebar = ({ user, friends, onFriendSelect, toggleFriendsView }) => {
               className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer 
                 ${selectedFriend === friend._id ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
               onClick={() => {
-                onFriendSelect(friend._id, friend.username);
+                onFriendSelect(friend._id, friend.username,friend.profileImage);
                 setSelectedFriend(friend._id);
               }}
             >
@@ -107,7 +107,7 @@ const Sidebar = ({ user, friends, onFriendSelect, toggleFriendsView }) => {
           </button>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };
 

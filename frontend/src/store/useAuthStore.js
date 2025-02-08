@@ -44,7 +44,10 @@ export const useAuthStore = create((set, get) => ({
         set({ isLoggingIn: true });
 
         try {
+
+            console.log('data:',data);
             const res = await axiosInstance.post("/auth/login", data);
+           
             set({ authUser: res.data });
             toast.success("Login successful");
             get().connectSocket();
@@ -58,13 +61,17 @@ export const useAuthStore = create((set, get) => ({
     logout: async () => {
         try {
             await axiosInstance.post("/auth/logout");
-            set({ authUser: null });
             toast.success("Logged out successfully");
-            get().disconnectSocket();
+            console.log("Logging out ho gya");
+    
         } catch (error) {
             toast.error(error.response?.data?.message || "Logout failed");
+        } finally {
+            set({ authUser: null }); // Ensures authUser is reset even if request fails
+            get().disconnectSocket?.(); // Prevents error if disconnectSocket is undefined
         }
     },
+    
 
     updateProfile: async (data) => {
         set({ isUpdatingProfile: true });

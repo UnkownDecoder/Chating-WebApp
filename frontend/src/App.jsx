@@ -11,6 +11,7 @@ import ForgetPass from "./Components/ForgetPassword";
 import Chat from "./Components/chat"; 
 import Settings from "./Components/Settings";
 import Developers from "./pages/Developers";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return <AppLayout />;
@@ -24,6 +25,7 @@ const AppLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900">
+      <Toaster position="top-center" />
       {/* Conditionally render Header and Footer */}
       {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
 
