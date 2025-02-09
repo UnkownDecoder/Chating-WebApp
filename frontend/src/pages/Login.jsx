@@ -1,24 +1,21 @@
 import React, { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Icons for password visibility toggle
-import { useNavigate } from "react-router-dom"; // For navigation
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    identifier: "", // For email or phone
+    identifier: "",
     password: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false); // For toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [showMessage, setShowMessage] = useState(false); // For controlling message visibility
+  const [showMessage, setShowMessage] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const validateForm = () => {
@@ -29,8 +26,7 @@ const Login = () => {
       !/^\d{10}$/.test(formData.identifier) &&
       !/\S+@\S+\.\S+/.test(formData.identifier)
     )
-      newErrors.identifier =
-        "Enter a valid email address or 10-digit phone number.";
+      newErrors.identifier = "Enter a valid email address or 10-digit phone number.";
     if (!formData.password) newErrors.password = "Password is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -45,20 +41,18 @@ const Login = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
-  
+
         const result = await response.json();
         if (response.ok) {
           console.log("response ", result);
-  
-          // Store user ID and username in localStorage
           localStorage.setItem("userId", result._id);
           localStorage.setItem("username", result.username);
           localStorage.setItem("profileImage", result.profileImage || "");
           localStorage.setItem("token", result.token);
-  
+
           setErrorMessage(`Welcome, ${result.username || "User"}!`);
           setShowMessage(true);
-  
+
           setTimeout(() => {
             setShowMessage(false);
             navigate("/chat", {
@@ -82,12 +76,11 @@ const Login = () => {
       }
     }
   };
-  
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">
-      <div className="w-full max-w-md bg-gray-900 text-white rounded-lg shadow-lg p-8">
-        <h2 className="text-3xl font-bold mb-6 text-center glow-effect">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black px-4">
+      <div className="w-full max-w-md bg-gray-900 text-white rounded-lg shadow-lg p-6 md:p-8">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
           Welcome Back!
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,17 +140,14 @@ const Login = () => {
 
         {/* Forgot Password */}
         <div className="text-center mt-4">
-          <a
-            href="/forgot-password"
-            className="text-blue-500 hover:underline hover:text-blue-300 text-sm"
-          >
+          <a href="/forgot-password" className="text-blue-500 hover:underline text-sm">
             Forgot Password?
           </a>
         </div>
 
         {/* Error Message */}
         {showMessage && (
-          <div className="dropdown-message">
+          <div className="mt-4 bg-red-500 text-white p-2 rounded-lg text-center">
             {errorMessage}
           </div>
         )}
@@ -165,10 +155,7 @@ const Login = () => {
         {/* Redirect to Register */}
         <p className="text-center text-gray-400 mt-4 text-sm">
           Haven't registered?{" "}
-          <a
-            href="/register"
-            className="text-blue-500 hover:underline hover:text-blue-300"
-          >
+          <a href="/register" className="text-blue-500 hover:underline">
             Register here
           </a>
         </p>

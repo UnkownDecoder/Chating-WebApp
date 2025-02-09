@@ -9,7 +9,7 @@ const Header = () => {
     <header className="bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white px-6 py-4 shadow-lg">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-wide "style={{ fontFamily: 'box' }}>
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-wide" style={{ fontFamily: 'box' }}>
           Chat-Zone
         </h1>
 
@@ -27,15 +27,17 @@ const Header = () => {
           <Link
             to="/Reviews"
             className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
-              location.pathname === "/Reviews" ? "text-blue-300" : "hover:scale-105" 
+              location.pathname === "/Reviews" ? "text-blue-300" : "hover:scale-105"
             }`}
-            style={{ fontFamily: 'wall' }}  
+            style={{ fontFamily: 'wall' }}
           >
             Reviews
           </Link>
           <Link
             to="/features"
-            className="text-lg font-medium hover:text-blue-300 transition-all duration-300 hover:scale-105"
+            className={`text-lg font-medium hover:text-blue-300 transition-all duration-300 ${
+              location.pathname === "/features" ? "text-blue-300" : "hover:scale-105"
+            }`}
             style={{ fontFamily: 'wall' }}
           >
             Features
@@ -113,13 +115,15 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <a
-                href="#features"
+              <Link
+                to="/features"
                 onClick={() => setIsMenuOpen(false)}
-                className="block text-lg font-medium hover:text-blue-300"
+                className={`block text-lg font-medium hover:text-blue-300 ${
+                  location.pathname === "/features" ? "text-blue-300" : ""
+                }`}
               >
                 Features
-              </a>
+              </Link>
             </li>
             <li>
               <Link

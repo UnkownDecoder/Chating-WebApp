@@ -14,7 +14,6 @@ const Register = () => {
     phone: "",
     bio: "",
   });
-  
 
   const navigate = useNavigate();
 
@@ -54,7 +53,6 @@ const Register = () => {
       console.log(type + " image selected:", file);  // Add this log to check the selected file
     }
   };
-  
 
   const handleRemoveImage = (type) => {
     if (type === "profile") setProfileImage(null);
@@ -133,11 +131,55 @@ const Register = () => {
       }
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black">
-      <div className="w-full max-w-4xl flex space-x-8">
+      <div className="w-full max-w-4xl flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-8">
+        {/* Right Section: Preview */}
+        <div className="w-full md:w-1/2 bg-gray-800 text-white rounded-lg shadow-lg p-4 md:order-2">
+          <div className="relative flex flex-col items-center space-y-4">
+            {/* Header Div with Banner Image */}
+            <div className="w-full h-[150px] bg-gray-700 rounded-lg">
+              {bannerImage ? (
+                <img
+                  src={URL.createObjectURL(bannerImage)}  // Similarly, create a temporary URL for banner image preview
+                  alt="Banner"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <MdPhotoCamera className="text-4xl text-gray-400 absolute inset-0 m-auto" />
+              )}
+            </div>
+
+            {/* Profile Image */}
+            <div className="absolute left-4 top-20">
+              <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-900">
+                {profileImage ? (
+                  <img
+                    src={URL.createObjectURL(profileImage)}  // This creates a temporary URL for preview
+                    alt="Profile"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <MdPhotoCamera className="text-4xl text-gray-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Preview Details */}
+            <div className="w-full p-4">
+              <div className="w-full bg-transparent rounded-lg mb-4 flex items-center justify-start">
+                <h3 className="text-xl font-semibold">{formData.username || "Username"}</h3>
+              </div>
+              <div className="w-full bg-transparent rounded-lg mb-4 flex items-start justify-start">
+                <p className="text-sm text-gray-400">{formData.bio || "Bio not provided."}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Left Section: Registration Form */}
-        <div className="w-1/2 bg-gray-900 text-white rounded-lg shadow-lg p-8">
+        <div className="w-full md:w-1/2 bg-gray-900 text-white rounded-lg shadow-lg p-8 md:order-1">
           <h2 className="text-3xl font-bold mb-6 text-center glow-effect">
             Create an Account
           </h2>
@@ -277,7 +319,7 @@ const Register = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 rows="4"
-                placeholder="Write something Reviews yourself..."
+                placeholder="Write something about yourself..."
                 maxLength="300"
               ></textarea>
             </div>
@@ -336,7 +378,7 @@ const Register = () => {
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 transform transition-all duration-300"
-             // Disable button while loading
+              disabled={loading} // Disable button while loading
             >
               {loading ? "Submitting..." : "Register"}
             </button>
@@ -352,49 +394,6 @@ const Register = () => {
           {/* Login Link */}
           <div className="mt-4 text-center text-white">
             Already have an account? <Link to="/login" className="text-blue-500 hover:underline">Login here</Link>
-          </div>
-        </div>
-
-        {/* Right Section: Preview */}
-        <div className="w-[300px] h-[340.85px] bg-gray-800 text-white rounded-lg shadow-lg ">
-          <div className="relative flex flex-col items-center space-y-4">
-            {/* Header Div with Banner Image */}
-            <div className="w-[300px] h-[150px] bg-gray-700 rounded-lg">
-              {bannerImage ? (
-                <img
-                   src={URL.createObjectURL(bannerImage)}  // Similarly, create a temporary URL for banner image preview
-                   alt="Banner"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              ) : (
-                <MdPhotoCamera className="text-4xl text-gray-400 absolute inset-0 m-auto" />
-              )}
-            </div>
-
-            {/* Profile Image */}
-            <div className="absolute left-4 top-20">
-              <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-900">
-                {profileImage ? (
-                  <img
-                     src={URL.createObjectURL(profileImage)}  // This creates a temporary URL for preview
-                     alt="Profile"
-                     className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <MdPhotoCamera className="text-4xl text-gray-400" />
-                )}
-              </div>
-            </div>
-
-            {/* Preview Details */}
-            <div className="w-[300px] h-[126.85px] p-4">
-              <div className="w-[268px] h-[24px] bg-transparent rounded-lg mb-4 flex items-center justify-start">
-                <h3 className="text-xl font-semibold">{formData.username || "Username"}</h3>
-              </div>
-              <div className="w-[268px] h-[55.25px] bg-transparent rounded-lg mb-4 flex items-start justify-start">
-                <p className="text-sm text-gray-400">{formData.bio || "Bio not provided."}</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
