@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -32,50 +34,28 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const { login, isLoggingIn } = useAuthStore();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:5172/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          console.log("response ", result);
-          localStorage.setItem("userId", result._id);
-          localStorage.setItem("username", result.username);
-          localStorage.setItem("profileImage", result.profileImage || "");
-          localStorage.setItem("token", result.token);
-
-          setErrorMessage(`Welcome, ${result.username || "User"}!`);
-          setShowMessage(true);
-
-          setTimeout(() => {
-            setShowMessage(false);
-            navigate("/chat", {
-              state: {
-                username: result.username,
-                profileImage: result.profileImage || "default-image-url",
-                token: result.token,
-              },
-            });
-          }, 3000);
-        } else {
-          setErrorMessage(result.message || "Login failed");
-          setShowMessage(true);
-          setTimeout(() => setShowMessage(false), 3000);
-        }
+        await login(formData);
+        setErrorMessage("Login successful!");
+        setShowMessage(true);
+        setTimeout(() => {
+          setShowMessage(false);
+          navigate("/chat");
+        }, 3000);
       } catch (error) {
         console.error("Error:", error);
-        setErrorMessage("Login failed");
+        setErrorMessage(error.message || "Login failed");
         setShowMessage(true);
         setTimeout(() => setShowMessage(false), 3000);
       }
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black px-4">
@@ -133,9 +113,11 @@ const Login = () => {
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 transform transition-all duration-300"
+            disabled={isLoggingIn}
           >
-            Login
+            {isLoggingIn ? "Logging in..." : "Login"}
           </button>
+
         </form>
 
         {/* Forgot Password */}

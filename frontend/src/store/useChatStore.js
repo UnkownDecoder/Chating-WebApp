@@ -4,11 +4,14 @@ import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
-    messages: [],
+    messages: [], // Store messages as an array
+    messageCache: new Map(),
     users: [],
     selectedUser: null,
     isUsersLoading: false,
     isMessagesLoading: false,
+    currentPage: 1,
+    hasMoreMessages: true,
 
     getUsers: async () => {
         set({ isUsersLoading: true });
@@ -18,7 +21,7 @@ export const useChatStore = create((set, get) => ({
         } catch (error) {
             if (error.response?.status === 401) {
                 toast.error("Session expired. Please login again.");
-                useAuthStore.getState().logout();  // Logout user on 401
+                useAuthStore.getState().logout();
             } else {
                 toast.error(error.response?.data?.message || "An error occurred.");
             }
@@ -27,68 +30,157 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    getMessages: async (userId) => {
+    getMessages: async (userId, page = 1) => {
+        if (get().messageCache.has(userId) && page === 1) {
+            set({ 
+                messages: get().messageCache.get(userId),
+                isMessagesLoading: false
+            });
+            return;
+        }
+
         set({ isMessagesLoading: true });
         try {
-            const res = await axiosInstance.get(`/messages/${userId}`);
-            set({ messages: res.data });
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            
+            const res = await axiosInstance.get(`/messages/${userId}`, {
+                params: { page },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const newMessages = res.data;
+            set((state) => {
+                const updatedMessages = page === 1 
+                    ? [...newMessages] 
+                    : [...state.messages, ...newMessages];
+
+                state.messageCache.set(userId, updatedMessages);
+
+                return {
+                    messages: updatedMessages,
+                    currentPage: page,
+                    hasMoreMessages: newMessages.length > 0
+                };
+            });
         } catch (error) {
             if (error.response?.status === 401) {
                 toast.error("Session expired. Please login again.");
                 useAuthStore.getState().logout();
             } else {
-                toast.error(error.response?.data?.message || "An error occurred.");
+                console.error("Error fetching messages:", error);
+                toast.error(error.response?.data?.message || "Failed to load messages. Please try again.");
             }
         } finally {
             set({ isMessagesLoading: false });
         }
     },
 
-    sendMessage: async (messageData) => {
-        const { selectedUser, messages } = get();
+    sendMessage: async (formData) => {
+        const { selectedUser } = get();
         if (!selectedUser) {
             toast.error("No user selected.");
             return;
         }
-
+    
         try {
-            const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-            set({ messages: [...messages, res.data] });
+            const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+    
+            set((state) => ({
+                messages: [...state.messages, res.data],
+            }));
+    
         } catch (error) {
+            console.error("Send Message Error:", error.response || error);
             toast.error(error.response?.data?.message || "Failed to send message.");
         }
     },
-
+    
     subscribeToMessages: () => {
         const { selectedUser } = get();
-        if (!selectedUser) return;
-
-        const socket = useAuthStore.getState().socket;
-        if (!socket) {
-            console.warn("Socket is not connected.");
+        if (!selectedUser) {
+            console.warn("No user selected for message subscription");
             return;
         }
 
-        const handleNewMessage = (newMessage) => {
-            if (newMessage.senderId !== selectedUser._id) return;
+        const { socket, connectSocket } = useAuthStore.getState();
+        
+        // Clean up existing listeners
+        if (socket) {
+            socket.off("newMessage");
+        }
 
-            set({
-                messages: [...get().messages, newMessage],
-            });
+        const handleNewMessage = (newMessage) => {
+            if (!newMessage || !selectedUser._id) return;
+
+            // Check if the new message is for the selected user
+            if (newMessage.senderId === selectedUser._id || newMessage.receiverId === selectedUser._id) {
+                set((state) => ({
+                    messages: [...state.messages, newMessage], // Add new message to the array
+                }));
+            }
         };
 
-        socket.on("newMessage", handleNewMessage);
+        const handleSocketError = (error) => {
+            console.error("Socket error:", error);
+            setTimeout(() => {
+                connectSocket();
+                setupSocket();
+            }, 5000);
+        };
 
-        // Store reference to the handler for cleanup
-        set({ unsubscribeFromMessages: () => socket.off("newMessage", handleNewMessage) });
+        const setupSocket = () => {
+            if (!socket || !socket.connected) {
+                connectSocket();
+                
+                socket.once('connect', () => {
+                    socket.emit('joinChat', selectedUser._id);
+                    socket.on("newMessage", handleNewMessage);
+                    socket.on("error", handleSocketError);
+                });
+            } else {
+                socket.on("newMessage", handleNewMessage);
+                socket.on("error", handleSocketError);
+                socket.emit('joinChat', selectedUser._id);
+            }
+        };
+
+        setupSocket();
+
+        set({ 
+            unsubscribeFromMessages: () => {
+                if (socket) {
+                    socket.off("newMessage", handleNewMessage);
+                    socket.off("error", handleSocketError);
+                    socket.emit('leaveChat', selectedUser._id);
+                }
+            }
+        });
     },
 
     unsubscribeFromMessages: () => {
         const socket = useAuthStore.getState().socket;
         if (socket) {
             socket.off("newMessage");
+            socket.emit('leaveChat', get().selectedUser?._id);
         }
     },
 
-    setSelectedUser: (selectedUser) => set({ selectedUser }),
+    setSelectedUser: (selectedUser) => {
+        const currentSelected = get().selectedUser;
+        if (currentSelected?._id === selectedUser?._id) {
+            set({ selectedUser: null });
+            get().unsubscribeFromMessages();
+        } else {
+            set({ selectedUser });
+        }
+    },
 }));

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { FaSearch, FaSignOutAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
+import { useAuthStore } from '../store/useAuthStore';
 
 const Settings = () => {
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const [activeSection, setActiveSection] = useState('My Account');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
@@ -14,9 +16,13 @@ const Settings = () => {
     window.history.back();
   };
 
-  const handleLogoutClick = () => {
-    console.log('Logging out...');
-    navigate('/');
+  const handleLogoutClick = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const languages = [
@@ -43,7 +49,7 @@ const Settings = () => {
     { name: 'Norwegian', code: 'NO', country: 'Norway' },
     { name: 'Danish', code: 'DK', country: 'Denmark' },
     { name: 'Finnish', code: 'FI', country: 'Finland' },
-    { name: 'Polish', code: 'PL', country: 'Poland' },
+    { name: 'Polish', code: 'PL', country: 'Polland' },
     { name: 'Czech', code: 'CZ', country: 'Czech Republic' },
     { name: 'Hungarian', code: 'HU', country: 'Hungary' },
     { name: 'Romanian', code: 'RO', country: 'Romania' },
@@ -65,7 +71,7 @@ const Settings = () => {
               <div className="bg-gray-800 text-white p-4 rounded-t-lg mb-0" style={{ width: '660px', height: '100px' }}>
                 <h3 className="text-xl font-semibold mb-2">Banner</h3>
               </div>
-              <div className="bg-gray-800 text-white " style={{ width: '660px', height: '70px', padding: '16px 16px 0px 120px' }}>
+              <div className="bg-gray-8 00 text-white " style={{ width: '660px', height: '70px', padding: '16px 16px 0px 120px' }}>
                 <h3 className="text-xl font-semibold mb-2">Additional Section</h3>
               </div>
               <div className="bg-gray-800 text-white" style={{ width: '628px', height: '263.95px', margin: '8px 16px 16px', padding: '16px' }}>
@@ -172,7 +178,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white">
+    <div className="flex h-screen bg-gradient-to-r from-gray-800 via-gray-900 to black text-white">
       {/* Left Section */}
       <div className="bg-gray-900 text-white p-4 flex flex-col justify-between w-1/4">
         <div className="flex flex-col mb-4">
@@ -180,7 +186,7 @@ const Settings = () => {
             <input
               type="text"
               placeholder="Search"
-              value={searchQuery}
+              value="searchQuery"
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full p-2 pr-10 mb-4 border border-gray-600 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />

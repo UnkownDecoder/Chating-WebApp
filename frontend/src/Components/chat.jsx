@@ -1,26 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { io } from 'socket.io-client';
-import axios from 'axios';
+import { useLocation } from "react-router-dom";
+import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { FaPaperclip } from 'react-icons/fa';
 import { IoMdSend } from 'react-icons/io';
 import AddFriends from './AddFriends';
 import Sidebar from './Sidebar';
 import ChatHeader from './ChatHeader';
-import { useChatStore } from "../store/useChatStore";
 import NoChatSelected from "./NoChatSelected";
 import ChatContainer from "./ChatContainer";
 
-
-
 const Chat = () => {
-  const [socket, setSocket] = useState(null);
+  const { socket, connectSocket } = useAuthStore();
+  const { selectedUser, setSelectedUser, getUsers, users } = useChatStore();
+
   const [message, setMessage] = useState('');
   const [typing, setTyping] = useState('');
   const [showFriends, setShowFriends] = useState(false);
   const [showAddFriendMessage, setShowAddFriendMessage] = useState(false);
   const [friendRequestMessage, setFriendRequestMessage] = useState('');
-  const [friends, setFriends] = useState([]);
   const [selectedFriendId, setSelectedFriendId] = useState(null);
   const [selectedFriendName, setSelectedFriendName] = useState('');
   const [file, setFile] = useState(null);
@@ -33,8 +31,6 @@ const Chat = () => {
     username: location.state?.username || "Guest",
     profileImage: location.state?.profileImage || "default-image-url",
   });
-
-  const { selectedUser, setSelectedUser } = useChatStore();
 
   const toggleFriendsView = () => {
     setShowFriends((prev) => !prev);
@@ -56,13 +52,10 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5172', {
-      query: { userId: userId },
-    });
-    setSocket(newSocket);
-    newSocket.emit('register', userId);
-    return () => newSocket.close();
-  }, [selectedFriendId, userId]);
+    if (!socket || !socket.connected) {
+      connectSocket();
+    }
+  }, [socket, connectSocket]);
 
   useEffect(() => {
     if (userId) {
@@ -75,22 +68,17 @@ const Chat = () => {
 
   const fetchUserData = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
-      const response = await axios.get(`http://localhost:5172/api/chat/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await useAuthStore.getState().getUserProfile();
     } catch (error) {
       if (error.response?.status === 401) {
-        window.location.href = "/login";
+        useAuthStore.getState().logout();
       }
     }
   };
 
   const fetchFriends = async () => {
     try {
-      const response = await axios.get(`http://localhost:5172/api/user/friends/${userId}`);
-      setFriends(response.data.friends);
+      await getUsers();
     } catch (error) {
       console.error("Error fetching friends:", error);
     }
@@ -99,7 +87,7 @@ const Chat = () => {
   const handleFriendSelect = (friendId, friendName) => {
     setSelectedFriendId(friendId);
     setSelectedFriendName(friendName);
-    const selectedFriend = friends.find((friend) => friend._id === friendId);
+    const selectedFriend = users.find((friend) => friend._id === friendId);
     if (selectedFriend) {
       setSelectedUser({
         _id: selectedFriend._id,
@@ -113,7 +101,7 @@ const Chat = () => {
     <div className="flex h-screen bg-black">
       <Sidebar 
         user={user} 
-        friends={friends} 
+        friends={users} 
         onFriendSelect={handleFriendSelect} 
         toggleFriendsView={toggleFriendsView}
       />
