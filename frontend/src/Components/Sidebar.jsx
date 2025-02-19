@@ -10,7 +10,6 @@ const Sidebar = ({ user, friends, onFriendSelect, toggleFriendsView }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState(null);
   const navigate = useNavigate();
 
   // Toggle Mute
