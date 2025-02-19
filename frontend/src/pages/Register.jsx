@@ -1,5 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import React, { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+
 import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa"; // Icons for toggling visibility and removing images
 import { MdPhotoCamera } from "react-icons/md"; // Icon for camera
 
@@ -22,8 +24,9 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [bannerImage, setBannerImage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { signUp, isSigningUp } = useAuthStore();
   const [successMessage, setSuccessMessage] = useState("");
+
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -87,49 +90,33 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      setLoading(true);
-      try {
-        const formDataToSend = new FormData();
-        formDataToSend.append("bannerImage", bannerImage); // Append the file, not the state variable
-        formDataToSend.append("profileImage", profileImage); // Append the file, not the state variable
-        formDataToSend.append("username", formData.username);
-        formDataToSend.append("email", formData.email);
-        formDataToSend.append("phone", formData.phone);
-        formDataToSend.append("birthdate", formData.birthdate);
-        formDataToSend.append("bio", formData.bio);
-        formDataToSend.append("password", formData.password);
+      const formDataToSend = new FormData();
+      formDataToSend.append("bannerImage", bannerImage);
+      formDataToSend.append("profileImage", profileImage);
+      formDataToSend.append("username", formData.username);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("birthdate", formData.birthdate);
+      formDataToSend.append("bio", formData.bio);
+      formDataToSend.append("password", formData.password);
 
-        const response = await fetch("http://localhost:5172/api/auth/signup", {
-          method: "POST",
-          body: formDataToSend,
-        });
+      await signUp(formDataToSend);
+      setSuccessMessage("Registration successful!");
+      navigate('/login');
 
-        const result = await response.json();
-        if (response.ok) {
-          alert("Registration successful");
-          setSuccessMessage("Registration successful!");
-          navigate('/login');
-        } else {
-          alert(result.message || "Registration failed");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Registration failed");
-      } finally {
-        setLoading(false);
-        setFormData({
-          username: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-          birthdate: "",
-          phone: "",
-          bio: "",
-        });
-        setProfileImage(null);
-        setBannerImage(null);
-      }
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        birthdate: "",
+        phone: "",
+        bio: "",
+      });
+      setProfileImage(null);
+      setBannerImage(null);
     }
+
   };
 
   return (
@@ -378,9 +365,10 @@ const Register = () => {
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 transform transition-all duration-300"
-              disabled={loading} // Disable button while loading
+              disabled={isSigningUp} // Disable button while loading
             >
-              {loading ? "Submitting..." : "Register"}
+              {isSigningUp ? "Submitting..." : "Register"}
+
             </button>
           </form>
 

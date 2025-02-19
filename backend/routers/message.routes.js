@@ -18,4 +18,5 @@ router.get("/users",ProtectRoute, getUsersForSideBar);
 router.get("/:id",ProtectRoute, getMessages);
 router.post("/send/:id", upload.single("file"), ProtectRoute, sendMessage);
 
+
 export default router;
