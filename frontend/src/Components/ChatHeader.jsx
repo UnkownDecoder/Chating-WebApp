@@ -1,13 +1,19 @@
 import React from "react";
-import { X } from "lucide-react";
+import { X, ArrowLeft } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser, isMessagesLoading } = useChatStore();
-  const { onlineUsers, user: loggedInUser } = useAuthStore();
-  
+  const { onlineUsers } = useAuthStore();
+
   if (!selectedUser) return null;
+
+  const handleBackClick = () => {
+    setSelectedUser(null);
+    // Add logic to show the sidebar again
+    document.getElementById('sidebar').classList.remove('hidden');
+  };
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -39,20 +45,18 @@ const ChatHeader = () => {
           </div>
         </div>
 
-        {/* close button */}
-        <button onClick={() => setSelectedUser(null)} className="btn btn-circle">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M6 18L18 6M6 6l12 12" />
-          </svg>
+        {/* close/back button */}
+        <button 
+          onClick={handleBackClick} 
+          className="btn btn-circle md:hidden"
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <button 
+          onClick={() => setSelectedUser(null)} 
+          className="btn btn-circle hidden md:block"
+        >
+          <X className="h-6 w-6" />
         </button>
       </div>
     </div>

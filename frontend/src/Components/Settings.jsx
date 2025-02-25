@@ -1,16 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaSignOutAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import Flag from 'react-world-flags';
 import { useAuthStore } from '../store/useAuthStore';
+import axios from 'axios';
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { logout } = useAuthStore();
+  const { logout, authUser, updateProfile, setAuthUser } = useAuthStore();
   const [activeSection, setActiveSection] = useState('My Account');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [selectedTheme, setSelectedTheme] = useState('Default Theme');
+  const [profilePhoto, setProfilePhoto] = useState(authUser?.profileImage || '');
+  const [name, setName] = useState(authUser?.name || '');
+  const [bio, setBio] = useState(authUser?.bio || '');
+  const [email, setEmail] = useState(authUser?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(authUser?.phoneNumber || '');
+  const [theme, setTheme] = useState('dark'); // State to manage the current theme
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    // Apply the theme to the application
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const fetchUserDetails = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      const response = await axios.get(`http://localhost:5172/api/user/${userId}`);
+      const userData = response.data;
+
+      setName(userData.name);
+      setEmail(userData.email);
+      setPhoneNumber(userData.phoneNumber);
+      setProfilePhoto(userData.profileImage);
+      setAuthUser(userData);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
 
   const handleBackClick = () => {
     window.history.back();
@@ -25,40 +55,37 @@ const Settings = () => {
     }
   };
 
-  const languages = [
-    { name: 'English', code: 'US', country: 'United States' },
-    { name: 'Spanish', code: 'ES', country: 'Spain' },
-    { name: 'French', code: 'FR', country: 'France' },
-    { name: 'German', code: 'DE', country: 'Germany' },
-    { name: 'Chinese', code: 'CN', country: 'China' },
-    { name: 'Japanese', code: 'JP', country: 'Japan' },
-    { name: 'Korean', code: 'KR', country: 'South Korea' },
-    { name: 'Italian', code: 'IT', country: 'Italy' },
-    { name: 'Portuguese', code: 'PT', country: 'Portugal' },
-    { name: 'Russian', code: 'RU', country: 'Russia' },
-    { name: 'Arabic', code: 'SA', country: 'Saudi Arabia' },
-    { name: 'Hindi', code: 'IN', country: 'India' },
-    { name: 'Bengali', code: 'BD', country: 'Bangladesh' },
-    { name: 'Urdu', code: 'PK', country: 'Pakistan' },
-    { name: 'Turkish', code: 'TR', country: 'Turkey' },
-    { name: 'Vietnamese', code: 'VN', country: 'Vietnam' },
-    { name: 'Thai', code: 'TH', country: 'Thailand' },
-    { name: 'Dutch', code: 'NL', country: 'Netherlands' },
-    { name: 'Greek', code: 'GR', country: 'Greece' },
-    { name: 'Swedish', code: 'SE', country: 'Sweden' },
-    { name: 'Norwegian', code: 'NO', country: 'Norway' },
-    { name: 'Danish', code: 'DK', country: 'Denmark' },
-    { name: 'Finnish', code: 'FI', country: 'Finland' },
-    { name: 'Polish', code: 'PL', country: 'Polland' },
-    { name: 'Czech', code: 'CZ', country: 'Czech Republic' },
-    { name: 'Hungarian', code: 'HU', country: 'Hungary' },
-    { name: 'Romanian', code: 'RO', country: 'Romania' },
-    { name: 'Hebrew', code: 'IL', country: 'Israel' },
-    { name: 'Indonesian', code: 'ID', country: 'Indonesia' },
-    { name: 'Malay', code: 'MY', country: 'Malaysia' },
-    { name: 'Filipino', code: 'PH', country: 'Philippines' },
-    { name: 'Swahili', code: 'KE', country: 'Kenya' },
-  ];
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProfile({ profileImage: profilePhoto, name, bio });
+      alert('Profile updated successfully');
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      alert('Profile update failed');
+    }
+  };
+
+  const handleProfilePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhoto(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const maskEmail = (email) => {
+    const [user, domain] = email.split('@');
+    const maskedUser = user.slice(0, Math.ceil(user.length / 2)) + '*'.repeat(Math.floor(user.length / 2));
+    return `${maskedUser}@${domain}`;
+  };
+
+  const maskPhoneNumber = (phoneNumber) => {
+    return phoneNumber.slice(0, Math.ceil(phoneNumber.length / 2)) + '*'.repeat(Math.floor(phoneNumber.length / 2));
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -71,35 +98,57 @@ const Settings = () => {
               <div className="bg-gray-800 text-white p-4 rounded-t-lg mb-0" style={{ width: '660px', height: '100px' }}>
                 <h3 className="text-xl font-semibold mb-2">Banner</h3>
               </div>
-              <div className="bg-gray-8 00 text-white " style={{ width: '660px', height: '70px', padding: '16px 16px 0px 120px' }}>
+              <div className="bg-gray-800 text-white " style={{ width: '660px', height: '70px', padding: '16px 16px 0px 120px' }}>
                 <h3 className="text-xl font-semibold mb-2">Additional Section</h3>
               </div>
               <div className="bg-gray-800 text-white" style={{ width: '628px', height: '263.95px', margin: '8px 16px 16px', padding: '16px' }}>
                 <h3 className="text-xl font-semibold mb-2">Info</h3>
-                <p>Display some information here.</p>
+                <p>{name || 'No name available'}</p>
+                <p>{email ? maskEmail(email) : 'No email available'}</p>
+                <p>{phoneNumber ? maskPhoneNumber(phoneNumber) : 'No phone number available'}</p>
               </div>
             </div>
           </div>
         );
       case 'My Profile':
         return (
-          <div>
+          <div className="p-4">
             <h2 className="text-2xl font-semibold mb-4">My Profile</h2>
-            <p>Profile details go here...</p>
-          </div>
-        );
-      case 'Devices':
-        return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Devices</h2>
-            <p>Devices details go here...</p>
-          </div>
-        );
-      case 'Connections':
-        return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Connections</h2>
-            <p>Connections details go here...</p>
+            <form onSubmit={handleProfileUpdate}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300">Profile Photo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePhotoChange}
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {profilePhoto && <img src={profilePhoto} alt="Profile" className="mt-2 w-32 h-32 rounded-full" />}
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 bg-gray-800 text-gray-300 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300">Bio</label>
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 bg-gray-800 text-gray-300 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+              >
+                Update Profile
+              </button>
+            </form>
           </div>
         );
       case 'Appearance':
@@ -117,14 +166,20 @@ const Settings = () => {
             <div className="flex space-x-4 mb-4">
               <div
                 className={`relative w-16 h-16 rounded-full flex items-center justify-center cursor-pointer ${selectedTheme === 'White Theme' ? 'border-2 border-green-500' : 'border-2 border-gray-300'}`}
-                onClick={() => setSelectedTheme('White Theme')}
+                onClick={() => {
+                  setSelectedTheme('White Theme');
+                  setTheme('light');
+                }}
               >
                 <div className="w-12 h-12 bg-white rounded-full"></div>
                 {selectedTheme === 'White Theme' && <FaCheck className="absolute text-green-500" />}
               </div>
               <div
                 className={`relative w-16 h-16 rounded-full flex items-center justify-center cursor-pointer ${selectedTheme === 'Dark Theme' ? 'border-2 border-green-500' : 'border-2 border-gray-300'}`}
-                onClick={() => setSelectedTheme('Dark Theme')}
+                onClick={() => {
+                  setSelectedTheme('Dark Theme');
+                  setTheme('dark');
+                }}
               >
                 <div className="w-12 h-12 bg-gray-800 rounded-full"></div>
                 {selectedTheme === 'Dark Theme' && <FaCheck className="absolute text-green-500" />}
@@ -144,34 +199,6 @@ const Settings = () => {
             </div>
           </div>
         );
-      case 'Language':
-        return (
-          <div>
-            <h5 className="text-xl font-semibold mb-2">Language</h5>
-            <h1 className="text-2xl font-semibold mb-4">Select Your Language</h1>
-            <div className="h-full overflow-y-scroll">
-              {languages.map(language => (
-                <div
-                  key={language.name}
-                  className={`flex items-center space-x-2 cursor-pointer p-2 ${selectedLanguage === language.name ? 'bg-gray-200' : ''}`}
-                  onClick={() => setSelectedLanguage(language.name)}
-                >
-                  <Flag code={language.code} className="w-6 h-4" />
-                  <span>{language.name}</span>
-                  <span className="text-gray-500">({language.country})</span>
-                  {selectedLanguage === language.name && <FaCheck className="text-green-500" />}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case 'Notification':
-        return (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Notification</h2>
-            <p>Notification settings go here...</p>
-          </div>
-        );
       default:
         return <div>Select a section from the left menu.</div>;
     }
@@ -186,7 +213,7 @@ const Settings = () => {
             <input
               type="text"
               placeholder="Search"
-              value="searchQuery"
+              value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full p-2 pr-10 mb-4 border border-gray-600 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -200,8 +227,6 @@ const Settings = () => {
           <div className="flex flex-col space-y-2 mt-4">
             <button onClick={() => setActiveSection('My Account')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'My Account' ? 'bg-gray-600' : ''}`}>My Account</button>
             <button onClick={() => setActiveSection('My Profile')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'My Profile' ? 'bg-gray-600' : ''}`}>My Profile</button>
-            <button onClick={() => setActiveSection('Devices')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Devices' ? 'bg-gray-600' : ''}`}>Devices</button>
-            <button onClick={() => setActiveSection('Connections')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Connections' ? 'bg-gray-600' : ''}`}>Connections</button>
           </div>
           <hr className="my-4 border-gray-600" />
           <div className="flex items-center mt-4">
@@ -209,8 +234,6 @@ const Settings = () => {
           </div>
           <div className="flex flex-col space-y-2 mt-4">
             <button onClick={() => setActiveSection('Appearance')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Appearance' ? 'bg-gray-600' : ''}`}>Appearance</button>
-            <button onClick={() => setActiveSection('Language')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Language' ? 'bg-gray-600' : ''}`}>Language</button>
-            <button onClick={() => setActiveSection('Notification')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Notification' ? 'bg-gray-600' : ''}`}>Notification</button>
           </div>
           <hr className="my-4 border-gray-600" />
           <button

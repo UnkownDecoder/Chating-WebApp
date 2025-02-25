@@ -136,3 +136,15 @@ body {
 .hover-gradient:hover {
   background: linear-gradient(to right, #60a5fa, #a855f7);
 }
+
+
+/*message colour*/
+.my-message .chat-bubble {
+  background-color: #3b82f6; /* Blue color for your messages */
+  color: white;
+}
+
+.their-message .chat-bubble {
+  background-color: #2A323C; /* Default color for their messages */
+  color: white;
+}

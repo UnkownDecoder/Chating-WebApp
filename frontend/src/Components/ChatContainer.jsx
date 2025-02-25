@@ -29,7 +29,6 @@ const ChatContainer = () => {
   }, [selectedUser]);
 
   useEffect(() => {
-    
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -45,7 +44,7 @@ const ChatContainer = () => {
 
   if (!selectedUser) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="hidden md:flex flex-1 flex-col overflow-auto">
         <ChatHeader />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-500">Select a user to start chatting</p>
@@ -57,7 +56,7 @@ const ChatContainer = () => {
 
   if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="hidden md:flex flex-1 flex-col overflow-auto">
         <ChatHeader />
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <div className="loading loading-spinner text-primary"></div>
@@ -69,15 +68,13 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className={`flex-1 flex flex-col overflow-auto ${selectedUser ? 'block' : 'hidden md:block'}`}>
       <ChatHeader />
       <div className="flex-1 flex flex-col overflow-auto p-4 space-y-2">
         {messages.map((message, index) => (
-          
           <div
-          
             key={message._id}
-            className={`chat ${message.senderId === authUser?._id ? "chat-end" : "chat-start"} animate-fade-in`}
+            className={`chat ${message.senderId === authUser?._id ? "chat-end my-message" : "chat-start their-message"} animate-fade-in`}
             ref={index === messages.length - 1 ? messageEndRef : null}
           >
             <div className="chat-image avatar">
