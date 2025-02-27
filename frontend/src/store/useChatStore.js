@@ -83,12 +83,13 @@ export const useChatStore = create((set, get) => ({
     sendMessage: async (formData) => {
         const { selectedUser } = get();
         if (!selectedUser) {
-            toast.error("No user selected.");
+            toast.error("No user or group selected.");
             return;
         }
     
         try {
-            const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, formData, {
+            const endpoint = selectedUser._id ? `/messages/send/${selectedUser._id}` : `/groups/send/${selectedUser.id}`;
+            const res = await axiosInstance.post(endpoint, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -107,7 +108,7 @@ export const useChatStore = create((set, get) => ({
     subscribeToMessages: () => {
         const { selectedUser } = get();
         if (!selectedUser) {
-            console.warn("No user selected for message subscription");
+            console.warn("No user or group selected for message subscription");
             return;
         }
 
@@ -119,10 +120,10 @@ export const useChatStore = create((set, get) => ({
         }
 
         const handleNewMessage = (newMessage) => {
-            if (!newMessage || !selectedUser._id) return;
+            if (!newMessage || (!selectedUser._id && !selectedUser.id)) return;
 
-            // Check if the new message is for the selected user
-            if (newMessage.senderId === selectedUser._id || newMessage.receiverId === selectedUser._id) {
+            // Check if the new message is for the selected user or group
+            if (newMessage.senderId === selectedUser._id || newMessage.receiverId === selectedUser._id || newMessage.groupId === selectedUser.id) {
                 set((state) => ({
                     messages: [...state.messages, newMessage], // Add new message to the array
                 }));
@@ -142,14 +143,16 @@ export const useChatStore = create((set, get) => ({
                 connectSocket();
                 
                 socket.once('connect', () => {
-                    socket.emit('joinChat', selectedUser._id);
+                    const roomId = selectedUser._id || selectedUser.id;
+                    socket.emit('joinChat', roomId);
                     socket.on("newMessage", handleNewMessage);
                     socket.on("error", handleSocketError);
                 });
             } else {
                 socket.on("newMessage", handleNewMessage);
                 socket.on("error", handleSocketError);
-                socket.emit('joinChat', selectedUser._id);
+                const roomId = selectedUser._id || selectedUser.id;
+                socket.emit('joinChat', roomId);
             }
         };
 
@@ -160,7 +163,8 @@ export const useChatStore = create((set, get) => ({
                 if (socket) {
                     socket.off("newMessage", handleNewMessage);
                     socket.off("error", handleSocketError);
-                    socket.emit('leaveChat', selectedUser._id);
+                    const roomId = selectedUser._id || selectedUser.id;
+                    socket.emit('leaveChat', roomId);
                 }
             }
         });
@@ -170,13 +174,13 @@ export const useChatStore = create((set, get) => ({
         const socket = useAuthStore.getState().socket;
         if (socket) {
             socket.off("newMessage");
-            socket.emit('leaveChat', get().selectedUser?._id);
+            socket.emit('leaveChat', get().selectedUser?._id || get().selectedUser?.id);
         }
     },
 
     setSelectedUser: (selectedUser) => {
         const currentSelected = get().selectedUser;
-        if (currentSelected?._id === selectedUser?._id) {
+        if (currentSelected?._id === selectedUser?._id || currentSelected?.id === selectedUser?.id) {
             set({ selectedUser: null });
             get().unsubscribeFromMessages();
         } else {

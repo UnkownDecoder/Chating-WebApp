@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Image, Smile, X } from 'lucide-react';
+import { Send, Paperclip, Smile, X } from 'lucide-react';
 import { useChatStore } from '../store/useChatStore';
 import { useAuthStore } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
@@ -155,11 +155,11 @@ const MessageInput = () => {
                     />
                     <button
                         type="button"
-                        aria-label="Attach image"
+                        aria-label="Attach file"
                         className={`btn btn-circle p-2 h-10 w-10 sm:h-12 sm:w-12 ${imagePreview ? "text-emerald-500" : "text-zinc-400"} flex items-center justify-center`}
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <Image size={20} />
+                        <Paperclip size={20} />
                     </button>
                 </div>
 

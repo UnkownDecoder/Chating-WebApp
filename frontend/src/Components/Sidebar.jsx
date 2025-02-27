@@ -3,11 +3,14 @@ import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaVolumeMute, FaCog, FaPlu
 import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import CreateGroupPopup from "./CreateGroupPopup";
 
 const Sidebar = ({ toggleFriendsView }) => {
   const { selectedUser, setSelectedUser } = useChatStore();
   const { authUser, friends, fetchFriends, isFetchingFriends } = useAuthStore();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [groups, setGroups] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -69,6 +72,18 @@ const Sidebar = ({ toggleFriendsView }) => {
     document.getElementById('sidebar').classList.add('hidden'); // Hide sidebar on mobile
   };
 
+  // Handle group click
+  const handleGroupClick = (group) => {
+    setSelectedUser(group);
+    setIsSidebarVisible(false); // Hide sidebar on mobile after selecting a group
+    document.getElementById('sidebar').classList.add('hidden'); // Hide sidebar on mobile
+  };
+
+  // Handle group creation
+  const handleCreateGroup = (newGroup) => {
+    setGroups((prevGroups) => [...prevGroups, newGroup]);
+  };
+
   return (
     <div id="sidebar" className={`fixed inset-0 md:relative md:w-64 bg-gray-900 text-white p-4 flex flex-col ${isSidebarVisible ? 'block' : 'hidden md:block'}`}>
       {/* Search Bar */}
@@ -117,12 +132,29 @@ const Sidebar = ({ toggleFriendsView }) => {
         ) : (
           <p className="text-gray-400 text-sm">No friends added yet.</p>
         )}
+
+        {/* Groups List */}
+        {groups.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-2">Groups</h3>
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer 
+                  ${selectedUser?.id === group.id ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
+                onClick={() => handleGroupClick(group)}
+              >
+                <span className="text-white">{group.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Plus Button */}
       <button
         className="absolute bottom-20 right-4 bg-gray-800 hover:bg-gray-700 p-2 w-10 h-10 flex items-center justify-center rounded-lg shadow-md transition-all z-40"
-        onClick={() => console.log("Plus Icon Clicked")} // Replace with actual function
+        onClick={() => setIsPopupVisible(true)}
       >
         <FaPlus className="text-white text-lg" />
       </button>
@@ -164,6 +196,11 @@ const Sidebar = ({ toggleFriendsView }) => {
           </button>
         </div>
       </div>
+
+      {/* Create Group Popup */}
+      {isPopupVisible && (
+        <CreateGroupPopup friends={filteredFriends} onClose={() => setIsPopupVisible(false)} onCreateGroup={handleCreateGroup} />
+      )}
     </div>
   );
 };
