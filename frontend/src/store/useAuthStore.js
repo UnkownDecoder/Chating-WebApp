@@ -15,8 +15,9 @@ export const useAuthStore = create((set, get) => ({
     onlineUsers: [],
     socket: null,
     friends: [],
+    groups: [],
     isFetchingFriends: false,
-
+    isFetchingGroups: false,
 
     checkAuth: async () => {
         try {
@@ -49,6 +50,7 @@ export const useAuthStore = create((set, get) => ({
             localStorage.setItem('email', res.data.email);
             localStorage.setItem('profileImage', res.data.profileImage || '');
             get().connectSocket();
+            get().fetchGroups(); // Fetch groups after authentication
         } catch (error) {
             console.log("Error checking auth:", error);
             set({ authUser: null });
@@ -105,6 +107,7 @@ export const useAuthStore = create((set, get) => ({
 
             toast.success("Login successful");
             get().connectSocket();
+            get().fetchGroups(); // Fetch groups after login
         } catch (error) {
             toast.error(error.response?.data?.message || "Login failed");
         } finally {
@@ -130,7 +133,7 @@ export const useAuthStore = create((set, get) => ({
             document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
             document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
-            toast.success("Logged out successfully");
+            toast("Logged out successfully");
             get().disconnectSocket();
         } catch (error) {
             toast.error(error.response?.data?.message || "Logout failed");
@@ -255,6 +258,43 @@ export const useAuthStore = create((set, get) => ({
         } finally {
             set({ isFetchingFriends: false });
         }
-    }
+    },
 
+    fetchGroups: async () => {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+            console.error("No user ID found");
+            return;
+        }
+
+        set({ isFetchingGroups: true });
+        try {
+            const res = await axiosInstance.get(`/groups/${userId}`);
+            if (res.data) {
+                set({ groups: res.data.groups || [] });
+            } else {
+                console.error("No groups data received");
+                set({ groups: [] });
+            }
+        } catch (error) {
+            console.error("Error fetching groups:", error);
+            toast.error(error.response?.data?.message || "Failed to fetch groups");
+            set({ groups: [] });
+        } finally {
+            set({ isFetchingGroups: false });
+        }
+    },
+
+    createGroup: async (groupData) => {
+        try {
+            const res = await axiosInstance.post("/groups", groupData);
+            set((state) => ({
+                groups: [...state.groups, res.data.group]
+            }));
+            toast.success("Group created successfully");
+        } catch (error) {
+            console.error("Error creating group:", error);
+            toast.error(error.response?.data?.message || "Failed to create group");
+        }
+    }
 }));

@@ -185,6 +185,7 @@ export const useChatStore = create((set, get) => ({
             get().unsubscribeFromMessages();
         } else {
             set({ selectedUser });
+            get().subscribeToMessages();
         }
     },
 }));
