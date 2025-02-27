@@ -47,7 +47,7 @@ const ChatHeader = () => {
         {/* Back Button (Mobile) */}
         <button
           onClick={handleClose}
-          className="btn btn-circle block md:hidden flex items-center justify-center"
+          className="btn btn-circle md:hidden flex items-center justify-center"
         >
           <ArrowLeft className="h-6 w-6" />
         </button>

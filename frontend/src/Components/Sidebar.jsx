@@ -160,7 +160,7 @@ const Sidebar = ({ toggleFriendsView }) => {
       </button>
 
       {/* User Info + Controls */}
-      <div className="absolute bottom-0 left-0 w-full bg-gray-900 p-2 flex items-center justify-between border-t border-gray-700 h-16 sm:h-20 z-30 md:flex hidden">
+      <div className="absolute bottom-0 left-0 w-full bg-gray-900 p-2 flex items-center justify-between border-t border-gray-700 h-16 sm:h-20 z-30 md:flex">
         {/* User Avatar & Name */}
         <div className="flex items-center space-x-2">
           {authUser?.profileImage ? (
