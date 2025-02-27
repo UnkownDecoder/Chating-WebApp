@@ -41,6 +41,7 @@ const MessageInput = () => {
 
     const removeImage = () => {
         setImagePreview(null);
+        setSelectedImage(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -89,6 +90,19 @@ const MessageInput = () => {
         }
     };
 
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (showEmojiPicker && !e.target.closest('.emoji-picker')) {
+                setShowEmojiPicker(false);
+            }
+        };
+
+        document.addEventListener("click", handleClickOutside);
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+        };
+    }, [showEmojiPicker]);
+
     return (
         <div className="p-4 w-full relative">
             {imagePreview && (
@@ -110,20 +124,23 @@ const MessageInput = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+            <form onSubmit={handleSendMessage} className="flex items-center gap-3 sm:gap-4">
                 <div className="flex-1 flex gap-2 items-center relative">
                     <button
                         type="button"
                         aria-label="Emoji picker"
-                        className="flex items-center justify-center btn btn-circle p-1 sm:p-2 h-10 w-10 sm:h-12 sm:w-12 text-zinc-400"
-                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="btn btn-circle p-2 h-10 w-10 sm:h-12 sm:w-12 text-zinc-400 flex items-center justify-center"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowEmojiPicker(!showEmojiPicker);
+                        }}
                     >
-                        <Smile size={16} className="sm:size-20" />
+                        <Smile size={20} />
                     </button>
 
                     <input
                         type="text"
-                        className="w-full input input-bordered rounded-lg input-sm sm:input-md"
+                        className="w-full input input-bordered rounded-lg input-md bg-transparent text-white"
                         placeholder="Type a message..."
                         value={text}
                         onChange={(e) => setText(e.target.value)}
@@ -139,23 +156,26 @@ const MessageInput = () => {
                     <button
                         type="button"
                         aria-label="Attach image"
-                        className={`flex items-center justify-center btn btn-circle p-1 sm:p-2 h-10 w-10 sm:h-12 sm:w-12 ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+                        className={`btn btn-circle p-2 h-10 w-10 sm:h-12 sm:w-12 ${imagePreview ? "text-emerald-500" : "text-zinc-400"} flex items-center justify-center`}
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <Image size={16} className="sm:size-20" />
+                        <Image size={20} />
                     </button>
                 </div>
 
                 <button
                     type="submit"
-                    className="btn btn-circle p-1 sm:p-2 h-10 w-10 sm:h-12 sm:w-12"
+                    className="btn btn-circle p-2 h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center"
                 >
-                    <Send size={16} className="sm:size-22" />
+                    <Send size={20} />
                 </button>
             </form>
 
             {showEmojiPicker && (
-                <div className="absolute bottom-16 left-4 z-50 bg-zinc-800 rounded-lg shadow-lg">
+                <div
+                    className="absolute bottom-16 left-4 z-50 bg-zinc-800 rounded-lg shadow-lg emoji-picker"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <Picker data={data} onEmojiSelect={handleEmojiSelect} theme="dark" />
                 </div>
             )}

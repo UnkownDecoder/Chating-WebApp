@@ -110,7 +110,7 @@ const ChatContainer = () => {
 
       {fullImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" onClick={closeImageModal}>
-          <div className="relative max-w-3xl w-full">
+          <div className="relative max-w-3xl w-full" onClick={(e) => e.stopPropagation()}>
             <button
               className="absolute top-2 right-2 text-white text-3xl font-bold cursor-pointer"
               onClick={closeImageModal}
