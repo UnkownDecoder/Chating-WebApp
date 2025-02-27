@@ -121,46 +121,46 @@ const Sidebar = ({ toggleFriendsView }) => {
 
       {/* Plus Button */}
       <button
-        className="absolute bottom-14 right-4 bg-gray-800 hover:bg-gray-700 p-2 w-10 h-10 flex items-center justify-center rounded-lg shadow-md transition-all"
+        className="absolute bottom-20 right-4 bg-gray-800 hover:bg-gray-700 p-2 w-10 h-10 flex items-center justify-center rounded-lg shadow-md transition-all z-40"
         onClick={() => console.log("Plus Icon Clicked")} // Replace with actual function
       >
         <FaPlus className="text-white text-lg" />
       </button>
 
       {/* User Info + Controls */}
-      <div className="absolute bottom-0 left-0 w-full bg-gray-900 p-2 flex items-center justify-between border-t border-gray-700 hidden md:flex">
+      <div className="absolute bottom-0 left-0 w-full bg-gray-900 p-2 flex items-center justify-between border-t border-gray-700 h-16 sm:h-20 z-30 md:flex hidden">
         {/* User Avatar & Name */}
         <div className="flex items-center space-x-2">
           {authUser?.profileImage ? (
             <img
               src={authUser.profileImage}
               alt="User"
-              className="rounded-full w-9 h-9"
+              className="rounded-full w-10 h-10"
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gray-700"></div>
+            <div className="w-10 h-10 rounded-full bg-gray-700"></div>
           )}
-          <span className="text-white text-xs truncate">{authUser?.username || "Guest"}</span>
+          <span className="text-white text-sm truncate">{authUser?.username || "Guest"}</span>
         </div>
 
         {/* Controls */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <button
-            className={`p-1 rounded ${isMuted ? "text-red-500" : "text-white"} hover:text-gray-400`}
+            className={`p-2 rounded ${isMuted ? "text-red-500" : "text-white"} hover:text-gray-400`}
             onClick={toggleMute}
           >
-            {isMuted ? <FaMicrophoneSlash size={12} /> : <FaMicrophone size={12} />}
+            {isMuted ? <FaMicrophoneSlash size={16} /> : <FaMicrophone size={16} />}
           </button>
 
           <button
-            className={`p-1 rounded ${isDeafened ? "text-red-500" : "text-white"} hover:text-gray-400`}
+            className={`p-2 rounded ${isDeafened ? "text-red-500" : "text-white"} hover:text-gray-400`}
             onClick={toggleDeafen}
           >
-            {isDeafened ? <FaVolumeMute size={12} /> : <FaVolumeUp size={12} />}
+            {isDeafened ? <FaVolumeMute size={16} /> : <FaVolumeUp size={16} />}
           </button>
 
-          <button className="p-1 text-white hover:text-gray-400" onClick={handleSettingsClick}>
-            <FaCog size={12} />
+          <button className="p-2 text-white hover:text-gray-400" onClick={handleSettingsClick}>
+            <FaCog size={16} />
           </button>
         </div>
       </div>
