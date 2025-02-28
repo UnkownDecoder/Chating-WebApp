@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaSignOutAlt, FaTimes, FaCheck } from 'react-icons/fa';
+import { FaTimes, FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import axios from 'axios';
+import SettingsSidebar from './SettingSidebar'; // Ensure the path is correct
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Settings = () => {
   const [email, setEmail] = useState(authUser?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(authUser?.phoneNumber || '');
   const [theme, setTheme] = useState('dark'); // State to manage the current theme
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true); // State to manage sidebar visibility
 
   useEffect(() => {
     fetchUserDetails();
@@ -43,7 +45,11 @@ const Settings = () => {
   };
 
   const handleBackClick = () => {
-    window.history.back();
+    if (window.innerWidth < 768) { // Check if the screen width is less than 768px (mobile)
+      setIsSidebarVisible(true); // Show sidebar on mobile when back button is clicked
+    } else {
+      window.history.back();
+    }
   };
 
   const handleLogoutClick = async () => {
@@ -92,21 +98,12 @@ const Settings = () => {
       case 'My Account':
         return (
           <div className="p-4">
-            <h3 className="text-2xl font-semibold mb-4" style={{ width: '660px', height: '30px' }}>My Account</h3>
-
-            <div className="p-4" style={{ width: '660px', height: '466.35px' }}>
-              <div className="bg-gray-800 text-white p-4 rounded-t-lg mb-0" style={{ width: '660px', height: '100px' }}>
-                <h3 className="text-xl font-semibold mb-2">Banner</h3>
-              </div>
-              <div className="bg-gray-800 text-white " style={{ width: '660px', height: '70px', padding: '16px 16px 0px 120px' }}>
-                <h3 className="text-xl font-semibold mb-2">Additional Section</h3>
-              </div>
-              <div className="bg-gray-800 text-white" style={{ width: '628px', height: '263.95px', margin: '8px 16px 16px', padding: '16px' }}>
-                <h3 className="text-xl font-semibold mb-2">Info</h3>
-                <p>{name || 'No name available'}</p>
-                <p>{email ? maskEmail(email) : 'No email available'}</p>
-                <p>{phoneNumber ? maskPhoneNumber(phoneNumber) : 'No phone number available'}</p>
-              </div>
+            <h3 className="text-2xl font-semibold mb-4">My Account</h3>
+            <div className="bg-gray-800 text-white p-4 rounded-lg">
+              <h3 className="text-xl font-semibold mb-2">Info</h3>
+              <p>{name || 'No name available'}</p>
+              <p>{email ? maskEmail(email) : 'No email available'}</p>
+              <p>{phoneNumber ? maskPhoneNumber(phoneNumber) : 'No phone number available'}</p>
             </div>
           </div>
         );
@@ -153,7 +150,7 @@ const Settings = () => {
         );
       case 'Appearance':
         return (
-          <div>
+          <div className="p-4">
             <h2 className="text-2xl font-semibold mb-4">Appearance</h2>
             <div className="bg-gray-800 text-white p-4 rounded-lg mb-4">
               <p className="mb-2">This is an example of a chat in Dark Theme.</p>
@@ -205,55 +202,31 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-gray-800 via-gray-900 to black text-white">
-      {/* Left Section */}
-      <div className="bg-gray-900 text-white p-4 flex flex-col justify-between w-1/4">
-        <div className="flex flex-col mb-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 pr-10 mb-4 border border-gray-600 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-              <FaSearch className="text-gray-500" />
-            </div>
-          </div>
-          <div className="flex items-center mt-6">
-            <span className="text-white font-bold text-sm">USER SETTINGS</span>
-          </div>
-          <div className="flex flex-col space-y-2 mt-4">
-            <button onClick={() => setActiveSection('My Account')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'My Account' ? 'bg-gray-600' : ''}`}>My Account</button>
-            <button onClick={() => setActiveSection('My Profile')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'My Profile' ? 'bg-gray-600' : ''}`}>My Profile</button>
-          </div>
-          <hr className="my-4 border-gray-600" />
-          <div className="flex items-center mt-4">
-            <span className="text-white font-bold text-sm">APP SETTINGS</span>
-          </div>
-          <div className="flex flex-col space-y-2 mt-4">
-            <button onClick={() => setActiveSection('Appearance')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Appearance' ? 'bg-gray-600' : ''}`}>Appearance</button>
-          </div>
-          <hr className="my-4 border-gray-600" />
-          <button
-            onClick={handleLogoutClick}
-            className="bg-transparent text-left text-red-500 py-2 px-4 rounded-lg hover:bg-red-600 hover:text-white flex items-center"
-          >
-            <FaSignOutAlt className="mr-2" />
-            Logout
-          </button>
-        </div>
-      </div>
-
+    <div className="flex h-screen bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white">
+      {isSidebarVisible && (
+        <SettingsSidebar
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          handleLogoutClick={handleLogoutClick}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setIsSidebarVisible={setIsSidebarVisible}
+        />
+      )}
       {/* Right Section */}
-      <div className="flex-grow flex flex-col bg-gray-900 p-4 relative">
+      <div className={`flex-grow flex flex-col bg-gray-900 p-4 relative ${isSidebarVisible ? 'hidden md:flex' : 'flex'}`}>
         <button
           onClick={handleBackClick}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-200"
         >
-          <FaTimes className="text-2xl" />
-          <span className="mt-2">ESC</span>
+          <span className="hidden md:inline">
+            <FaTimes className="text-2xl" />
+            <span className="mt-2">ESC</span>
+          </span>
+          <span className="md:hidden">
+            <FaArrowLeft className="text-2xl" />
+            <span className="mt-2">Back</span>
+          </span>
         </button>
         <div className="mt-16 flex-grow overflow-y-auto">
           {renderContent()}
