@@ -11,8 +11,10 @@ import ForgetPass from "./Components/ForgetPassword";
 import Chat from "./Components/chat"; 
 import Settings from "./Components/Settings";
 import Developers from "./pages/Developers";
+import { useThemeStore } from "./store/useThemeStore";
 
 const App = () => {
+  const { theme } = useThemeStore();
   return <AppLayout />;
 };
 
@@ -27,7 +29,7 @@ const AppLayout = () => {
       {/* Conditionally render Header and Footer */}
       {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
 
-      <div className="flex-grow">
+      <div  className="flex-grow">
         <Routes>
           <Route path="/" element={<Body />} />
           <Route path="/reviews" element={<Reviews />} />

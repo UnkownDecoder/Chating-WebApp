@@ -2,23 +2,33 @@ import React from 'react';
 import { FaSearch, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const SettingsSidebar = ({ activeSection, setActiveSection, handleLogoutClick, searchQuery, setSearchQuery, setIsSidebarVisible }) => {
+const SettingsSidebar = ({
+  activeSection,
+  setActiveSection,
+  handleLogoutClick,
+  searchQuery,
+  setSearchQuery,
+  setIsSidebarVisible
+}) => {
   const navigate = useNavigate();
 
+  // Shared handler for section clicks
   const handleSectionClick = (section) => {
     setActiveSection(section);
-    if (window.innerWidth < 768) { // Check if the screen width is less than 768px (mobile)
-      setIsSidebarVisible(false); // Hide sidebar on mobile after selecting a section
+    if (window.innerWidth < 768) {
+      setIsSidebarVisible(false);
     }
   };
 
   const handleCloseClick = () => {
-    navigate('/chat'); // Redirect to the chat page
+    navigate('/chat');
   };
 
   return (
     <div className="bg-gray-900 text-white p-4 flex flex-col justify-between w-full md:w-1/4 h-full md:h-auto fixed md:relative z-50 md:z-auto">
       <div className="flex flex-col mb-4">
+        
+        {/* Close Button */}
         <div className="relative flex items-center mb-4">
           <button
             onClick={handleCloseClick}
@@ -26,6 +36,8 @@ const SettingsSidebar = ({ activeSection, setActiveSection, handleLogoutClick, s
           >
             <FaTimes className="text-2xl" />
           </button>
+
+          {/* Search Bar */}
           <div className="relative flex-grow">
             <input
               type="text"
@@ -39,21 +51,53 @@ const SettingsSidebar = ({ activeSection, setActiveSection, handleLogoutClick, s
             </div>
           </div>
         </div>
+
+        {/* User Settings Section */}
         <div className="flex items-center mt-6">
           <span className="text-white font-bold text-sm">USER SETTINGS</span>
         </div>
         <div className="flex flex-col space-y-2 mt-4">
-          <button onClick={() => handleSectionClick('My Account')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'My Account' ? 'bg-gray-600' : ''}`}>My Account</button>
-          <button onClick={() => handleSectionClick('My Profile')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'My Profile' ? 'bg-gray-600' : ''}`}>My Profile</button>
+          {/* My Account */}
+          <button
+            onClick={() => handleSectionClick('My Account')}
+            className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${
+              activeSection === 'My Account' ? 'bg-gray-600' : ''
+            }`}
+          >
+            My Account
+          </button>
+
+          {/* My Profile (now fully matches the others) */}
+          <button
+            onClick={() => handleSectionClick('My Profile')}
+            className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${
+              activeSection === 'My Profile' ? 'bg-gray-600' : ''
+            }`}
+          >
+            My Profile
+          </button>
         </div>
+
         <hr className="my-4 border-gray-600" />
+
+        {/* App Settings Section */}
         <div className="flex items-center mt-4">
           <span className="text-white font-bold text-sm">APP SETTINGS</span>
         </div>
         <div className="flex flex-col space-y-2 mt-4">
-          <button onClick={() => handleSectionClick('Appearance')} className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${activeSection === 'Appearance' ? 'bg-gray-600' : ''}`}>Appearance</button>
+          <button
+            onClick={() => handleSectionClick('Appearance')}
+            className={`bg-transparent text-left text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${
+              activeSection === 'Appearance' ? 'bg-gray-600' : ''
+            }`}
+          >
+            Appearance
+          </button>
         </div>
+
         <hr className="my-4 border-gray-600" />
+
+        {/* Logout Button */}
         <button
           onClick={handleLogoutClick}
           className="bg-transparent text-left text-red-500 py-2 px-4 rounded-lg hover:bg-red-600 hover:text-white flex items-center"

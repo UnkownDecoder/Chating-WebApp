@@ -74,7 +74,7 @@ const ChatContainer = () => {
 
   if (!selectedUser) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto hidden md:flex">
+      <div className="flex-1 flex-col overflow-auto hidden md:flex">
         <ChatHeader />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-500">Select a user or group to start chatting</p>
@@ -85,7 +85,7 @@ const ChatContainer = () => {
 
   if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto hidden md:flex">
+      <div className="flex-1 flex flex-col overflow-auto md:flex">
         <ChatHeader />
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <div className="loading loading-spinner text-primary"></div>
