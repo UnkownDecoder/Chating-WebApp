@@ -7,10 +7,43 @@ import CreateGroupPopup from "./CreateGroupPopup";
 
 const Sidebar = ({ toggleFriendsView }) => {
   const { selectedUser, setSelectedUser } = useChatStore();
-  const { authUser, friends, fetchFriends, isFetchingFriends } = useAuthStore();
+  const { authUser, friends, fetchFriends, isFetchingFriends, groups, fetchGroups,createGroup } = useAuthStore();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [groups, setGroups] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (authUser?._id && isMounted) {
+      console.log("Fetching friends for user:", authUser._id);
+      fetchFriends().catch(error => {
+        console.error("Error fetching friends:", error);
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [authUser?._id, fetchFriends]);
+
+  // Only log friends when they change
+  useEffect(() => {
+    if (friends) {
+      console.log("friends are :", friends);
+    }
+  }, [friends]);
+
+  const filteredFriends = useMemo(() => {
+    if (!friends) return [];
+
+    // Handle both array and object response formats
+    const friendsArray = Array.isArray(friends) ? friends : friends.friends || [];
+
+    return friendsArray.filter(friend => {
+      if (!friend) return false;
+      console.log("Friend:", friend);
+      return true;
+    });
+  }, [friends]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isMuted, setIsMuted] = useState(false);
@@ -26,37 +59,6 @@ const Sidebar = ({ toggleFriendsView }) => {
   // Navigate to settings
   const handleSettingsClick = () => navigate("/settings");
 
-  useEffect(() => {
-    let isMounted = true;
-    if (authUser?._id && isMounted) {
-      console.log("Fetching friends for user:", authUser._id);
-      fetchFriends().catch((error) => {
-        console.error("Error fetching friends:", error);
-      });
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [authUser?._id, fetchFriends]);
-
-  useEffect(() => {
-    if (friends) {
-      console.log("friends are :", friends);
-    }
-  }, [friends]);
-
-  const filteredFriends = useMemo(() => {
-    if (!friends) return [];
-    // Handle both array and object response formats
-    const friendsArray = Array.isArray(friends) ? friends : friends.friends || [];
-    return friendsArray.filter((friend) => {
-      if (!friend) return false;
-      console.log("Friend:", friend);
-      return true;
-    });
-  }, [friends]);
-
-  // Handle friend click
   const handleFriendClick = (friend) => {
     if (selectedUser?._id === friend._id) {
       setSelectedUser(null);
@@ -64,14 +66,15 @@ const Sidebar = ({ toggleFriendsView }) => {
       setSelectedUser(friend);
     }
     setIsSidebarVisible(false); // Hide sidebar on mobile after selecting a friend
-    document.getElementById("sidebar").classList.add("hidden"); // Hide sidebar on mobile
+    document.getElementById('sidebar').classList.add('hidden'); // Hide sidebar on mobile
   };
 
-  // Handle group click
   const handleGroupClick = (group) => {
+
+    console.log("group select:",group);
     setSelectedUser(group);
     setIsSidebarVisible(false); // Hide sidebar on mobile after selecting a group
-    document.getElementById("sidebar").classList.add("hidden"); // Hide sidebar on mobile
+    document.getElementById('sidebar').classList.add('hidden'); // Hide sidebar on mobile
   };
 
   // Handle group creation
@@ -80,12 +83,7 @@ const Sidebar = ({ toggleFriendsView }) => {
   };
 
   return (
-    <div
-      id="sidebar"
-      className={`fixed inset-0 md:relative md:w-64 bg-gray-900 text-white p-4 flex flex-col ${
-        isSidebarVisible ? "block" : "hidden md:block"
-      }`}
-    >
+    <div id="sidebar" className={`fixed inset-0 md:relative md:w-64 bg-gray-900 text-white p-4 flex flex-col ${isSidebarVisible ? 'block' : 'hidden md:block'}`}>
       {/* Search Bar */}
       <input
         type="text"
@@ -95,7 +93,6 @@ const Sidebar = ({ toggleFriendsView }) => {
         placeholder="Find or Start Conversation"
       />
 
-      {/* Friends Button */}
       <button
         className="w-full py-2 mb-2 bg-transparent text-left text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
         onClick={toggleFriendsView}
@@ -112,7 +109,7 @@ const Sidebar = ({ toggleFriendsView }) => {
       </button>
 
       {/* Friends List */}
-      <div className="mt-4 flex-1 overflow-y-auto">
+      <div className="mt-2 flex-1 overflow-y-auto">
         {isFetchingFriends ? (
           <div className="flex items-center justify-center">
             <div className="loading loading-spinner text-primary"></div>
@@ -122,9 +119,8 @@ const Sidebar = ({ toggleFriendsView }) => {
           filteredFriends.map((friend) => (
             <div
               key={friend._id}
-              className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer ${
-                selectedUser?._id === friend._id ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"
-              }`}
+              className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer 
+                ${selectedUser?._id === friend._id ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
               onClick={() => handleFriendClick(friend)}
             >
               <img
@@ -142,16 +138,14 @@ const Sidebar = ({ toggleFriendsView }) => {
           <p className="text-gray-400 text-sm">No friends added yet.</p>
         )}
 
-        {/* Groups List */}
         {groups.length > 0 && (
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-2">Groups</h3>
             {groups.map((group) => (
               <div
                 key={group.id}
-                className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer ${
-                  selectedUser?.id === group.id ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"
-                }`}
+                className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer 
+                  ${selectedUser?.id === group.id ? "bg-blue-600" : "bg-gray-800 hover:bg-gray-700"}`}
                 onClick={() => handleGroupClick(group)}
               >
                 <span className="text-white">{group.name}</span>
@@ -161,9 +155,15 @@ const Sidebar = ({ toggleFriendsView }) => {
         )}
       </div>
 
-      {/* User Info + Controls */}
+      {/* Plus Button */}
+      <button
+        className="absolute bottom-20 right-4 bg-gray-800 hover:bg-gray-700 p-2 w-10 h-10 flex items-center justify-center rounded-lg shadow-md transition-all z-40"
+        onClick={() => setIsPopupVisible(true)}
+      >
+        <FaPlus className="text-white text-lg" />
+      </button>
+
       <div className="absolute bottom-0 left-0 w-full bg-gray-900 p-2 flex items-center justify-between border-t border-gray-700 h-16 sm:h-20 z-30 md:flex">
-        {/* User Avatar & Name */}
         <div className="flex items-center space-x-2">
           {authUser?.profileImage ? (
             <img
@@ -179,38 +179,22 @@ const Sidebar = ({ toggleFriendsView }) => {
           </span>
         </div>
 
-        {/* Controls */}
         <div className="flex space-x-3">
-          <button
-            className={`p-2 rounded ${isMuted ? "text-red-500" : "text-white"} hover:text-gray-400`}
-            onClick={toggleMute}
-          >
+          <button className={`p-2 rounded ${isMuted ? "text-red-500" : "text-white"} hover:text-gray-400`} onClick={toggleMute}>
             {isMuted ? <FaMicrophoneSlash size={16} /> : <FaMicrophone size={16} />}
           </button>
-
-          <button
-            className={`p-2 rounded ${isDeafened ? "text-red-500" : "text-white"} hover:text-gray-400`}
-            onClick={toggleDeafen}
-          >
+          <button className={`p-2 rounded ${isDeafened ? "text-red-500" : "text-white"} hover:text-gray-400`} onClick={toggleDeafen}>
             {isDeafened ? <FaVolumeMute size={16} /> : <FaVolumeUp size={16} />}
           </button>
 
-          <button
-            className="p-2 text-white hover:text-gray-400"
-            onClick={handleSettingsClick}
-          >
+          <button className="p-2 text-white hover:text-gray-400" onClick={handleSettingsClick}>
             <FaCog size={16} />
           </button>
         </div>
       </div>
-
-      {/* Create Group Popup */}
+     
       {isPopupVisible && (
-        <CreateGroupPopup
-          friends={filteredFriends}
-          onClose={() => setIsPopupVisible(false)}
-          onCreateGroup={handleCreateGroup}
-        />
+        <CreateGroupPopup friends={filteredFriends} onClose={() => setIsPopupVisible(false)} onCreateGroup={handleCreateGroup} />
       )}
     </div>
   );

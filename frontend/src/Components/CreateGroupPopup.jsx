@@ -14,18 +14,20 @@ const CreateGroupPopup = ({ friends, onClose, onCreateGroup }) => {
   };
 
   const handleCreateGroup = () => {
-    if (groupName.trim() && selectedFriends.length > 0) {
-      const newGroup = {
-        id: Date.now().toString(),
-        name: groupName,
-        members: selectedFriends,
-      };
-      onCreateGroup(newGroup);
-      onClose();
-    } else {
-      alert('Please enter a group name and select at least one friend.');
+    if (!groupName.trim() || selectedFriends.length === 0) {
+      alert("Please enter a group name and select at least one friend.");
+      return;
     }
+  
+    const groupData = {
+      name: groupName,
+      members: selectedFriends
+    };
+  
+    onCreateGroup(groupData); // Pass groupData to the function
   };
+  
+  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">

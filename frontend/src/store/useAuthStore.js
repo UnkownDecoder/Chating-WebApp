@@ -269,9 +269,12 @@ export const useAuthStore = create((set, get) => ({
 
         set({ isFetchingGroups: true });
         try {
-            const res = await axiosInstance.get(`/groups/${userId}`);
+            
+            const res = await axiosInstance.get(`/groups/my-groups/${userId}`);
+
+            console.log("Fetched groups data:", res.data);
             if (res.data) {
-                set({ groups: res.data.groups || [] });
+                set({ groups: res.data || [] });
             } else {
                 console.error("No groups data received");
                 set({ groups: [] });
@@ -287,7 +290,7 @@ export const useAuthStore = create((set, get) => ({
 
     createGroup: async (groupData) => {
         try {
-            const res = await axiosInstance.post("/groups", groupData);
+            const res = await axiosInstance.post("/groups/create", groupData);
             set((state) => ({
                 groups: [...state.groups, res.data.group]
             }));
