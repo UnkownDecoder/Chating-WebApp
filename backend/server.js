@@ -12,6 +12,7 @@ import forgetPas from "./routers/forgetPassword.js";
 import userInfo from "./routers/friendRoutes.js";
 import messageRoutes from "./routers/message.routes.js";
 import { app, server } from "./library/socket.utils.js";
+import groupRoutes from "./routers/groupRoutes.js";
 
 dotenv.config();
 
@@ -69,6 +70,7 @@ app.use("/api/auth", upload.fields([{ name: "profileImage" }, { name: "bannerIma
 app.use("/api/reviews", reviewRouter);
 app.use("/api/forget", forgetPas);
 app.use("/api/user", userInfo);
+app.use("/api/groups", groupRoutes);
 
 // **✅ Apply `multer` only to `messageRoutes` where needed**
 app.use("/api/messages", messageRoutes);

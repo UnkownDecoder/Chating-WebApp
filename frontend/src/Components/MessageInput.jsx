@@ -14,8 +14,8 @@ const MessageInput = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const fileInputRef = useRef(null);
 
-    const { sendMessage, selectedUser } = useChatStore();
-    const { socket } = useAuthStore();
+    const { sendMessage, selectedUser, socket } = useChatStore();
+    const { authUser } = useAuthStore();  // Assuming you might want to access current user info.
 
     const handleEmojiSelect = (emoji) => {
         setText((prev) => prev + emoji.native);
@@ -45,18 +45,26 @@ const MessageInput = () => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    // Typing Indicator Logic
     useEffect(() => {
         if (!socket || !selectedUser) return;
-
+        
         const typingTimeout = setTimeout(() => {
-            if (isTyping) {
-                socket.emit('stopTyping', selectedUser._id);
-                setIsTyping(false);
+            if (text.trim().length) {
+                if (!isTyping) {
+                    socket.emit('startTyping', selectedUser._id);
+                    setIsTyping(true);
+                }
+            } else {
+                if (isTyping) {
+                    socket.emit('stopTyping', selectedUser._id);
+                    setIsTyping(false);
+                }
             }
         }, 1000);
 
         return () => clearTimeout(typingTimeout);
-    }, [text, isTyping, socket, selectedUser]);
+    }, [text, isTyping, socket, selectedUser]); 
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -72,14 +80,13 @@ const MessageInput = () => {
             if (selectedImage) {
                 formData.append("file", selectedImage);
             }
-
+   
             await sendMessage(formData);
 
+            // Reset fields
             setText("");
-            setImagePreview(null);
-            setSelectedImage(null);
+            removeImage();
             setShowEmojiPicker(false);
-            if (fileInputRef.current) fileInputRef.current.value = "";
 
             if (socket && selectedUser) {
                 socket.emit('stopTyping', selectedUser._id);
@@ -90,6 +97,7 @@ const MessageInput = () => {
         }
     };
 
+    // Close Emoji Picker on Outside Click
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (showEmojiPicker && !e.target.closest('.emoji-picker')) {

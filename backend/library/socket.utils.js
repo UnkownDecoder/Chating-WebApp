@@ -13,7 +13,8 @@ const io = new Server(server, {
 });
 
 // Store online users
-const userSocketMap = {};
+const userSocketMap = {}; // { userId: socketId }
+const groupMembersMap = {}; // { groupId: [userIds] }
 
 // Function to get a receiver's socket ID
 export function getReciverSocketId(userId) {
@@ -25,7 +26,7 @@ io.on("connection", (socket) => {
 
   const userId = socket.handshake.query.userId;
   if (userId) {
-    userSocketMap[userId] = socket.id;  // Always update socket ID when user connects
+    userSocketMap[userId] = socket.id; // Always update socket ID when user connects
     console.log(`User registered: ${userId} -> ${socket.id}`);
   } else {
     console.log("User ID is missing, unable to map socket to user.");
@@ -34,19 +35,53 @@ io.on("connection", (socket) => {
   // Emit updated list of online users
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  // Handle message sending
+  // User joins a group chat
+  socket.on("joinGroup", ({ groupId, userId }) => {
+    socket.join(groupId);
+    console.log(`User ${userId} joined group: ${groupId}`);
+
+    if (!groupMembersMap[groupId]) {
+      groupMembersMap[groupId] = [];
+    }
+    if (!groupMembersMap[groupId].includes(userId)) {
+      groupMembersMap[groupId].push(userId);
+    }
+
+    io.to(groupId).emit("groupUsers", groupMembersMap[groupId]);
+  });
+
+  // User leaves a group chat
+  socket.on("leaveGroup", ({ groupId, userId }) => {
+    socket.leave(groupId);
+    console.log(`User ${userId} left group: ${groupId}`);
+
+    if (groupMembersMap[groupId]) {
+      groupMembersMap[groupId] = groupMembersMap[groupId].filter((id) => id !== userId);
+      io.to(groupId).emit("groupUsers", groupMembersMap[groupId]);
+    }
+  });
+
+  // Handle message sending (Supports both 1-to-1 & Group Chat)
   socket.on("sendMessage", (messageData) => {
     console.log("Message received from client:", messageData);
 
-    const receiverSocketId = userSocketMap[messageData.receiverId];
+    const { receiverId, groupId } = messageData;
 
-    // Send message to receiver if they are online
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", messageData);
-      console.log(`Message sent to receiver: ${messageData.receiverId}`);
+    if (groupId) {
+      // ✅ Send message to all members in the group
+      io.to(groupId).emit("newMessage", messageData);
+      console.log(`Group message sent to group ${groupId}`);
+    } else if (receiverId) {
+      // ✅ Send message only to a single recipient
+      const receiverSocketId = userSocketMap[receiverId];
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", messageData);
+        console.log(`Message sent to receiver: ${receiverId}`);
+      }
     }
 
-    // Also send the message back to the sender
+    // Send the message back to the sender as well
     io.to(socket.id).emit("newMessage", messageData);
   });
 
@@ -63,4 +98,4 @@ io.on("connection", (socket) => {
   });
 });
 
-export { io, app, server,userSocketMap };
+export { io, app, server, userSocketMap };
