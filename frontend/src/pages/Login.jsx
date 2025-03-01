@@ -129,7 +129,7 @@ const Login = () => {
 
         {/* Error Message */}
         {showMessage && (
-          <div className="mt-4 bg-red-500 text-white p-2 rounded-lg text-center">
+          <div className="mt-4 bg-green-500 text-white p-2 rounded-lg text-center">
             {errorMessage}
           </div>
         )}
