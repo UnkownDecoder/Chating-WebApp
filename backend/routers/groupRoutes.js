@@ -3,6 +3,7 @@ import Group from "../models/group.model.js";
 import mongoose from "mongoose";
 import Message from "../models/message.model.js";
 import multer from "multer";
+import cloudinary from "../library/cloudinary.js";
 import { ProtectRoute } from "../middleware/auth.middleware.js"; // Middleware to check auth
 import { userSocketMap, io } from "../library/socket.utils.js";
 
@@ -75,19 +76,19 @@ router.post("/send/:groupId", ProtectRoute, upload.single('file'), async (req, r
 
       // Prepare the image URL if a file was uploaded
       let imageUrl = null;
-      if (req.file) {
-          imageUrl = req.file.path; // Process image accordingly
-      }
-
-      // Check for duplicate messages
-      const existingMessage = await Message.findOne({
-          groupId,
-          senderId,
-          text: text || "",
-      });
-      if (existingMessage) {
-          return res.status(400).json({ message: "Duplicate message detected." });
-      }
+       if (req.file) {
+                     const uploadResponse = await cloudinary.uploader.upload(req.file.path, { resource_type: "auto" });
+                     imageUrl = uploadResponse.secure_url;
+                 }
+      // // Check for duplicate messages
+      // const existingMessage = await Message.findOne({
+      //     groupId,
+      //     senderId,
+      //     text: text || "",
+      // });
+      // if (existingMessage) {
+      //     return res.status(400).json({ message: "Duplicate message detected." });
+      // }
 
       // Create a new message
 

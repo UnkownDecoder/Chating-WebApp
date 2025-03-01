@@ -45,6 +45,8 @@ const ChatContainer = () => {
     }
   }, [messages]);
 
+
+  console.log("recebe messa:",messages);
   const handleImageClick = (imageUrl) => setFullImage(imageUrl);
   const closeImageModal = () => setFullImage(null);
 
@@ -123,7 +125,7 @@ const ChatContainer = () => {
               </div>
               <div className="chat-header mb-1">
                 {!isSender && (
-                  <span className="text-sm font-semibold">{isGroupMessage ? message.senderId.name : selectedUser.username}</span>
+                  <span className="text-sm font-semibold">{isGroupMessage ? message.senderId.username : selectedUser.username}</span>
                 )}
                 <time className="text-xs opacity-50 ml-1">{formatMessageTime(message.createdAt)}</time>
               </div>

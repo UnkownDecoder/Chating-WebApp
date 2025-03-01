@@ -113,7 +113,7 @@ export const useChatStore = create((set, get) => ({
     
         try {
             console.log("Sending message to:", formData);
-            console.log("Message data:", formData.get('text'), formData.get('isGroup'));
+            console.log("Message data:", formData.get('text'), formData.get('isGroup'), formData.get('file'));
 
     
             const res = await axiosInstance.post(endpoint, formData, {

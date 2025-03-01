@@ -67,22 +67,17 @@ export const getUsersForSideBar = async (req, res) => {
     
             console.log("Saving message:", newMessage);
             await newMessage.save();
-    
+
+    const responseMessage = await newMessage.populate("senderId", "username profileImage"); // Populate sender details
             // Emit message via socket.io
             const receiverSocketId = isGroup ? null : getReciverSocketId(receiverId);
             if (receiverSocketId) {
-                io.to(receiverSocketId).emit("newMessage", newMessage);
+                io.to(receiverSocketId).emit("newMessage", responseMessage);
             }
     
-            res.status(201).json({
-                _id: newMessage._id,
-                senderId: newMessage.senderId,
-                text: newMessage.text,
-                image: newMessage.image,
-                groupId: newMessage.groupId || null, 
-                receiverId: newMessage.receiverId || null,
-                createdAt: newMessage.createdAt,
-            });
+            res.status(201).json(
+                responseMessage
+            );
     
         } catch (error) {
             console.error("Error sending message:", error.message);
