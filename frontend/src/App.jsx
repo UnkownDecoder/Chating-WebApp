@@ -11,8 +11,8 @@ import ForgetPass from "./Components/ForgetPassword";
 import Chat from "./Components/chat"; 
 import Settings from "./Components/Settings";
 import Developers from "./pages/Developers";
-import AdminDashboard from "./pages/AdminDashboard";
 import { useThemeStore } from "./store/useThemeStore";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const App = () => {
   const { theme } = useThemeStore();
@@ -41,7 +41,7 @@ const AppLayout = () => {
           <Route path="/chat" element={<Chat />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/developers" element={<Developers />} /> 
-          <Route path="/admin" element={<AdminDashboard />} /> 
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </div>
 

@@ -8,12 +8,12 @@ const Login = () => {
     identifier: "",
     password: "",
   });
+
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showMessage, setShowMessage] = useState(false);
   const navigate = useNavigate();
-  const { login, isLoggingIn } = useAuthStore();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,20 +33,24 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const { login, isLoggingIn } = useAuthStore();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        await login(formData);
-        setErrorMessage("Login successful!");
-        setShowMessage(true);
-        setTimeout(() => {
-          setShowMessage(false);
-          // After login, redirect to admin dashboard if the user is an admin.
-          // For this example, assume that the login function sets the role in authUser.
-          // Adjust the check accordingly.
-          navigate("/admin");
-        }, 3000);
+        // Check if the credentials match the admin credentials
+        if (formData.identifier === 'lionjumama669@gmail.com' && formData.password === '246810') {
+          navigate('/admin');
+        } else {
+          await login(formData);
+          setErrorMessage("Login successful!");
+          setShowMessage(true);
+          setTimeout(() => {
+            setShowMessage(false);
+            navigate("/chat");
+          }, 3000);
+        }
       } catch (error) {
         console.error("Error:", error);
         setErrorMessage(error.message || "Login failed");
@@ -63,6 +67,7 @@ const Login = () => {
           Welcome Back!
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email or Phone */}
           <div>
             <label htmlFor="identifier" className="block text-sm font-medium mb-1">
               Email or Phone Number
@@ -81,6 +86,7 @@ const Login = () => {
             )}
           </div>
 
+          {/* Password */}
           <div className="relative">
             <label htmlFor="password" className="block text-sm font-medium mb-1">
               Password
@@ -106,6 +112,7 @@ const Login = () => {
             )}
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 transform transition-all duration-300"
@@ -115,18 +122,21 @@ const Login = () => {
           </button>
         </form>
 
+        {/* Forgot Password */}
         <div className="text-center mt-4">
           <a href="/forgot-password" className="text-blue-500 hover:underline text-sm">
             Forgot Password?
           </a>
         </div>
 
+        {/* Error Message */}
         {showMessage && (
           <div className="mt-4 bg-green-500 text-white p-2 rounded-lg text-center">
             {errorMessage}
           </div>
         )}
 
+        {/* Redirect to Register */}
         <p className="text-center text-gray-400 mt-4 text-sm">
           Haven't registered?{" "}
           <a href="/register" className="text-blue-500 hover:underline">
