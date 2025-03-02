@@ -3,18 +3,17 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 
-
 const Login = () => {
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
   });
-
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showMessage, setShowMessage] = useState(false);
   const navigate = useNavigate();
+  const { login, isLoggingIn } = useAuthStore();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,8 +33,6 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const { login, isLoggingIn } = useAuthStore();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
@@ -45,7 +42,10 @@ const Login = () => {
         setShowMessage(true);
         setTimeout(() => {
           setShowMessage(false);
-          navigate("/chat");
+          // After login, redirect to admin dashboard if the user is an admin.
+          // For this example, assume that the login function sets the role in authUser.
+          // Adjust the check accordingly.
+          navigate("/admin");
         }, 3000);
       } catch (error) {
         console.error("Error:", error);
@@ -56,7 +56,6 @@ const Login = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black px-4">
       <div className="w-full max-w-md bg-gray-900 text-white rounded-lg shadow-lg p-6 md:p-8">
@@ -64,7 +63,6 @@ const Login = () => {
           Welcome Back!
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email or Phone */}
           <div>
             <label htmlFor="identifier" className="block text-sm font-medium mb-1">
               Email or Phone Number
@@ -83,7 +81,6 @@ const Login = () => {
             )}
           </div>
 
-          {/* Password */}
           <div className="relative">
             <label htmlFor="password" className="block text-sm font-medium mb-1">
               Password
@@ -109,7 +106,6 @@ const Login = () => {
             )}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-semibold hover:scale-105 transform transition-all duration-300"
@@ -117,24 +113,20 @@ const Login = () => {
           >
             {isLoggingIn ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
-        {/* Forgot Password */}
         <div className="text-center mt-4">
           <a href="/forgot-password" className="text-blue-500 hover:underline text-sm">
             Forgot Password?
           </a>
         </div>
 
-        {/* Error Message */}
         {showMessage && (
           <div className="mt-4 bg-green-500 text-white p-2 rounded-lg text-center">
             {errorMessage}
           </div>
         )}
 
-        {/* Redirect to Register */}
         <p className="text-center text-gray-400 mt-4 text-sm">
           Haven't registered?{" "}
           <a href="/register" className="text-blue-500 hover:underline">
