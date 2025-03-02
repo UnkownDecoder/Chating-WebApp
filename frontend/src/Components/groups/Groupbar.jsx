@@ -5,7 +5,10 @@ import CreateGroupPopup from '../CreateGroupPopup'; // Adjust path if necessary
 const Groupbar = ({ onExit }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  // NEW: Open the CreateGroupPopup when New Group is clicked
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
+  // Dummy data for friends; replace with actual friends data if available.
+  const filteredFriends = [];
 
   const handleExit = () => {
     if (onExit) {
@@ -15,15 +18,15 @@ const Groupbar = ({ onExit }) => {
     }
   };
 
-  // NEW: Open the CreateGroupPopup when New Group is clicked
-  
-
-  // NEW: This function will be called after a new group is created
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const handleCreateGroup = (newGroup) => {
-    groups((prevGroups) => [...prevGroups, newGroup]);
+  const handleNewGroup = () => {
+    setIsPopupVisible(true);
   };
-  
+
+  // Placeholder function for handling group creation
+  const handleCreateGroup = (newGroup) => {
+    console.log("New group created:", newGroup);
+    setIsPopupVisible(false);
+  };
 
   return (
     <div className="bg-gray-900 text-white p-4 flex flex-col h-full overflow-y-auto relative">
@@ -46,7 +49,7 @@ const Groupbar = ({ onExit }) => {
           Exit
         </button>
         <button
-          onClick={() => setIsPopupVisible(true)}
+          onClick={handleNewGroup}
           className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg"
         >
           New Group

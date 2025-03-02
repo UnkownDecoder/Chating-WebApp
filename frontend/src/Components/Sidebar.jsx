@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import CreateGroupPopup from "./CreateGroupPopup";
-import Groupbar from "../Components/groups/Groupbar"; // NEW: Import the Groupbar component
+import Group from "../Components/groups/Group"; // NEW: Import Group.jsx component
 
 const Sidebar = ({ toggleFriendsView }) => {
   const { selectedUser, setSelectedUser } = useChatStore();
@@ -25,7 +25,7 @@ const Sidebar = ({ toggleFriendsView }) => {
     createGroup
   } = useAuthStore();
 
-  // NEW: State to control which sidebar content is shown ("default" or "groupbar")
+  // State to control which sidebar content is shown ("default" or "group")
   const [sidebarContent, setSidebarContent] = useState("default");
 
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -72,8 +72,6 @@ const Sidebar = ({ toggleFriendsView }) => {
   const toggleDeafen = () => setIsDeafened((prev) => !prev);
   const handleSettingsClick = () => navigate("/settings");
 
-  // Removed the old My Account handler
-
   const handleFriendClick = (friend) => {
     if (selectedUser?._id === friend._id) {
       setSelectedUser(null);
@@ -114,10 +112,10 @@ const Sidebar = ({ toggleFriendsView }) => {
             placeholder="Find or Start Conversation"
           />
 
-          {/* "Groups" Button (NEW: Replaces My Account) */}
+          {/* "Groups" Button */}
           <button
             className="w-full py-2 mb-2 bg-transparent text-left text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            onClick={() => setSidebarContent("groupbar")}
+            onClick={() => setSidebarContent("group")}
           >
             Groups
           </button>
@@ -237,8 +235,8 @@ const Sidebar = ({ toggleFriendsView }) => {
           </div>
         </>
       ) : (
-        // Render the Groupbar component inside the sidebar when sidebarContent is "groupbar"
-        <Groupbar onExit={() => setSidebarContent("default")} />
+        // Render the Group component (Group.jsx) inside the sidebar when sidebarContent is "group"
+        <Group onExit={() => setSidebarContent("default")} />
       )}
 
       {/* Popup for Group Creation */}
