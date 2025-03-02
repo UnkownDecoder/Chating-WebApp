@@ -11,26 +11,30 @@ import ForgetPass from "./Components/ForgetPassword";
 import Chat from "./Components/chat"; 
 import Settings from "./Components/Settings";
 import Developers from "./pages/Developers";
-import { useThemeStore } from "./store/useThemeStore";
 import AdminDashboard from "./pages/AdminDashboard";
+import { useThemeStore } from "./store/useThemeStore";
 
 const App = () => {
   const { theme } = useThemeStore();
-  return <AppLayout />;
+  return (
+    <div data-theme={theme}>
+      <AppLayout />
+    </div>
+  );
 };
 
 const AppLayout = () => {
-  const location = useLocation(); // Get current route location
+  const location = useLocation();
 
   // Define routes where Header and Footer should not be shown
-  const noHeaderFooterRoutes = ['/settings', '/chat'];
+  const noHeaderFooterRoutes = ["/settings", "/chat",];
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900">
-      {/* Conditionally render Header and Footer */}
+      {/* Conditionally render Header */}
       {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
 
-      <div  className="flex-grow">
+      <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Body />} />
           <Route path="/reviews" element={<Reviews />} />
@@ -41,7 +45,7 @@ const AppLayout = () => {
           <Route path="/chat" element={<Chat />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/developers" element={<Developers />} /> 
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} /> 
         </Routes>
       </div>
 
