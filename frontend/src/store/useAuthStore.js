@@ -108,8 +108,11 @@ export const useAuthStore = create((set, get) => ({
             toast.success("Login successful");
             get().connectSocket();
             get().fetchGroups(); // Fetch groups after login
+
+            return { success: true };
         } catch (error) {
             toast.error(error.response?.data?.message || "Login failed");
+            return { success: false, message: error.response?.data?.message || "Login failed" };
         } finally {
             set({ isLoggingIn: false });
         }
