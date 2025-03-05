@@ -41,19 +41,30 @@ const Login = () => {
       try {
         // Check if the credentials match the admin credentials
         if (formData.identifier === 'lionjumama669@gmail.com' && formData.password === '246810') {
-          navigate('/admin');
-        } else {
-          await login(formData);
           setErrorMessage("Login successful!");
           setShowMessage(true);
           setTimeout(() => {
             setShowMessage(false);
-            navigate("/chat");
+            navigate('/admin');
           }, 3000);
+        } else {
+          const response = await login(formData);
+          if (response?.success) {
+            setErrorMessage("Login successful!");
+            setShowMessage(true);
+            setTimeout(() => {
+              setShowMessage(false);
+              navigate("/chat");
+            }, 3000);
+          } else {
+            setErrorMessage(response?.message || "Invalid credentials");
+            setShowMessage(true);
+            setTimeout(() => setShowMessage(false), 3000);
+          }
         }
       } catch (error) {
         console.error("Error:", error);
-        setErrorMessage(error.message || "Login failed");
+        setErrorMessage("Invalid candidate");
         setShowMessage(true);
         setTimeout(() => setShowMessage(false), 3000);
       }
@@ -131,7 +142,7 @@ const Login = () => {
 
         {/* Error Message */}
         {showMessage && (
-          <div className="mt-4 bg-green-500 text-white p-2 rounded-lg text-center">
+          <div className={`mt-4 p-2 rounded-lg text-center ${errorMessage === "Login successful!" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
             {errorMessage}
           </div>
         )}
