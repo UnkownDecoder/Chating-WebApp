@@ -100,9 +100,17 @@ const Register = () => {
       formDataToSend.append("bio", formData.bio);
       formDataToSend.append("password", formData.password);
 
-      await signUp(formDataToSend);
-      setSuccessMessage("Registration successful!");
+   const response = await signUp(formDataToSend);
+   if (response?.success) {
+    setSuccessMessage("Registration successful!");
+    setShowMessage(true);
+    setTimeout(() => {
+      setShowMessage(false);
       navigate('/login');
+    }, 3000);
+  }
+   
+     
 
       setFormData({
         username: "",

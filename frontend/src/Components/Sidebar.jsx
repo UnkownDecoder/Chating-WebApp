@@ -10,8 +10,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import CreateGroupPopup from "./CreateGroupPopup";
+import CreateGroupPopup from "./groups/CreateGroupPopup";
 import Groupbar from "../Components/groups/Groupbar"; // NEW: Import the Groupbar component
+import { useGroupStore } from "../store/useGroupStore";
 
 const Sidebar = ({ toggleFriendsView }) => {
   const { selectedUser, setSelectedUser } = useChatStore();
@@ -33,6 +34,7 @@ const Sidebar = ({ toggleFriendsView }) => {
 
   // For searching among friends
   const [searchQuery, setSearchQuery] = useState("");
+  const { selectedGroup, setSelectedGroup } = useGroupStore();
 
   // Mute / Deafen state
   const [isMuted, setIsMuted] = useState(false);
@@ -77,8 +79,10 @@ const Sidebar = ({ toggleFriendsView }) => {
   const handleFriendClick = (friend) => {
     if (selectedUser?._id === friend._id) {
       setSelectedUser(null);
+      setSelectedGroup(null);
     } else {
       setSelectedUser(friend);
+      setSelectedGroup(null);
     }
     setIsSidebarVisible(false);
     document.getElementById("sidebar")?.classList.add("hidden");
@@ -131,12 +135,7 @@ const Sidebar = ({ toggleFriendsView }) => {
           </button>
 
           {/* Create Group Button (Top) */}
-          <button
-            className="mt-2 bg-gray-800 hover:bg-gray-700 p-2 w-10 h-10 flex items-center justify-center rounded-lg shadow-md transition-all z-40"
-            onClick={() => setIsPopupVisible(true)}
-          >
-            <FaPlus className="text-white text-lg" />
-          </button>
+        
 
           {/* Friends List */}
           <div className="mt-2 flex-1 overflow-y-auto">
@@ -172,25 +171,7 @@ const Sidebar = ({ toggleFriendsView }) => {
               <p className="text-gray-400 text-sm">No friends added yet.</p>
             )}
 
-            {groups.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-lg font-semibold mb-2">Groups</h3>
-                {groups.map((group) => (
-                  <div
-                    key={group.id}
-                    className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer 
-                      ${
-                        selectedUser?.id === group.id
-                          ? "bg-blue-600"
-                          : "bg-gray-800 hover:bg-gray-700"
-                      }`}
-                    onClick={() => handleGroupClick(group)}
-                  >
-                    <span className="text-white">{group.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+          
           </div>
 
           {/* Bottom User/Settings Bar */}

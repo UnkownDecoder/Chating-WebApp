@@ -24,6 +24,12 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+
+    const uniqueName = await User.findOne({ username });
+    if (uniqueName) {
+      return res.status(400).json({ message: 'this name is already registerd' });
+    }
+
     // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -82,6 +88,7 @@ export const login = async (req , res) => {
         { phone: identifier },
       ],
     });
+    console.log("user",user);
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid email, phone number, or password.' });
@@ -102,7 +109,10 @@ export const login = async (req , res) => {
       username: user.username,
       email: user.email,
       profileImage: user.profileImage || null,
+      phone: user.phone,
+      bannerImage: user.bannerImage || null,
       token: token,
+      bio: user.bio,
     })
     
 

@@ -40,44 +40,53 @@ export const getUsersForSideBar = async (req, res) => {
 
     export const sendMessage = async (req, res) => {
         try {
-            const { text } = req.body;
-            const { id: receiverId } = req.params; // Extract receiverId (or groupId)
+            const { text, messageType } = req.body;
+            const { id: receiverId } = req.params; // One-to-one chat ke liye receiverId
             const senderId = req.user._id;
     
-            const isGroup = req.body.isGroup === "true"; // Ensure frontend sends this flag
-    
             if (!text && !req.file) {
-                return res.status(400).json({ message: "Message content is required (text or image)" });
+                return res.status(400).json({ message: "Message content is required (text or media)" });
             }
     
-            let imageUrl = null;
+            let mediaUrl = null;
+            let finalMessageType = "text";
+    
+            // Agar file aayi hai toh uska type check karo
             if (req.file) {
                 const uploadResponse = await cloudinary.uploader.upload(req.file.path, { resource_type: "auto" });
-                imageUrl = uploadResponse.secure_url;
+                mediaUrl = uploadResponse.secure_url;
+    
+                const fileType = req.file.mimetype.split("/")[0]; // `image`, `video`, `audio`, `application`
+                if (fileType === "image") finalMessageType = "image";
+                else if (fileType === "video") finalMessageType = "video";
+                else if (fileType === "audio") finalMessageType = "audio";
+                else finalMessageType = "document"; // PDF, DOC, etc.
+            } else {
+                finalMessageType = messageType || "text";
             }
     
-            // Create a new message
+            // Naya message create karo
             const newMessage = new Message({
                 senderId,
+                receiverId, // One-to-one chat
+                messageType: finalMessageType,
                 text: text || "",
-                image: imageUrl || null,
-                receiverId: isGroup ? null : receiverId, // Only set receiverId for one-to-one messages
-                groupId: isGroup ? receiverId : null, // Only set groupId for group messages
+                mediaUrl: mediaUrl || null,
             });
     
             console.log("Saving message:", newMessage);
             await newMessage.save();
-
-    const responseMessage = await newMessage.populate("senderId", "username profileImage"); // Populate sender details
-            // Emit message via socket.io
-            const receiverSocketId = isGroup ? null : getReciverSocketId(receiverId);
+    
+            // Populate sender details
+            const responseMessage = await newMessage.populate("senderId", "username profileImage");
+    
+            // Socket.io Emit Message to receiver only
+            const receiverSocketId = getReciverSocketId(receiverId);
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("newMessage", responseMessage);
             }
     
-            res.status(201).json(
-                responseMessage
-            );
+            res.status(201).json(responseMessage);
     
         } catch (error) {
             console.error("Error sending message:", error.message);

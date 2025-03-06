@@ -14,6 +14,10 @@ export const useChatStore = create((set, get) => ({
     currentPage: 1,
     hasMoreMessages: true,
 
+    setMessages: (newMessages) => {
+        set({ messages: newMessages }); // ✅ Messages overwrite kar raha hai
+    },
+
     getUsers: async () => {
         set({ isUsersLoading: true });
         try {
@@ -31,36 +35,18 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    getGroups: async () => {
-        try {
-            const res = await axiosInstance.get("/groups");
-            set({ groups: res.data });
-        } catch (error) {
-            console.error("Error fetching groups:", error);
-            toast.error("Failed to load groups.");
-        }
-    },
+  
 
-    getMessages: async (id, isGroup = false, page = 1) => {
-        if (get().messageCache.has(id) && page === 1) {
-            set({ 
-                messages: get().messageCache.get(id),
-                isMessagesLoading: false
-            });
-            return;
-        }
-    
+    getMessages: async (id, page = 1) => {
         set({ isMessagesLoading: true });
+    
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('No authentication token found');
             }
     
-            const endpoint = isGroup ? `/groups/messages/${id}` : `/messages/${id}`;
-            console.log("end poi:",endpoint);
-            
-            const res = await axiosInstance.get(endpoint, {
+            const res = await axiosInstance.get(`/messages/${id}`, {
                 params: { page },
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -70,19 +56,12 @@ export const useChatStore = create((set, get) => ({
             const newMessages = res.data;
             console.log("Fetched messages:", newMessages);
     
-            set((state) => {
-                // ✅ Remove duplicates while updating state
-                const allMessages = [...state.messages, ...newMessages];
-                const uniqueMessages = Array.from(new Map(allMessages.map(m => [m._id, m])).values());
-    
-                state.messageCache.set(id, uniqueMessages);
-    
-                return {
-                    messages: uniqueMessages,
-                    currentPage: page,
-                    hasMoreMessages: newMessages.length > 0
-                };
+            set({
+                messages: newMessages, 
+                currentPage: page,
+                hasMoreMessages: newMessages.length > 0
             });
+    
         } catch (error) {
             if (error.response?.status === 401) {
                 toast.error("Session expired. Please login again.");
@@ -96,6 +75,7 @@ export const useChatStore = create((set, get) => ({
         }
     },
     
+    
 
     sendMessage: async (formData) => {
         const { selectedUser } = get();
@@ -104,19 +84,9 @@ export const useChatStore = create((set, get) => ({
             return;
         }
     
-        const isGroup = !!selectedUser.members; // ✅ Detect group chat properly
-        formData.append("isGroup", isGroup.toString()); // ✅ Send flag to backend
-    
-        const endpoint = isGroup 
-            ? `/groups/send/${selectedUser._id || selectedUser.groupId}` 
-            : `/messages/send/${selectedUser._id}`;
-    
         try {
             console.log("Sending message to:", formData);
-            console.log("Message data:", formData.get('text'), formData.get('isGroup'), formData.get('file'));
-
-    
-            const res = await axiosInstance.post(endpoint, formData, {
+            const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
     

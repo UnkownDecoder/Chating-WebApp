@@ -1,15 +1,9 @@
 import express from 'express';
-import multer from "multer";
+import upload from '../library/multer.js';
 import { ProtectRoute } from '../middleware/auth.middleware.js';
 import { sendMessage, getMessages, getUsersForSideBar } from '../controllers/message.controller.js';
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-const upload = multer({ storage });
+
 
 const router = express.Router();
 

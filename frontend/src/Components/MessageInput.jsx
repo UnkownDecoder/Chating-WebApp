@@ -1,106 +1,118 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Smile, X } from 'lucide-react';
-import { useChatStore } from '../store/useChatStore';
-import { useAuthStore } from '../store/useAuthStore';
-import toast from 'react-hot-toast';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Paperclip, Smile, X, FileText, Video, Mic } from "lucide-react";
+import { useChatStore } from "../store/useChatStore";
+import { useGroupStore } from "../store/useGroupStore"; // Import group store
+import { useAuthStore } from "../store/useAuthStore";
+import toast from "react-hot-toast";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
 
 const MessageInput = () => {
     const [text, setText] = useState("");
-    const [imagePreview, setImagePreview] = useState(null);
-    const [selectedImage, setSelectedImage] = useState(null);
+    const [filePreview, setFilePreview] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileType, setFileType] = useState(null);
     const [isTyping, setIsTyping] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const fileInputRef = useRef(null);
 
-    const { sendMessage, selectedUser, socket } = useChatStore();
-    const { authUser } = useAuthStore();  // Assuming you might want to access current user info.
+    const { sendMessage: sendUserMessage, selectedUser, socket } = useChatStore();
+    const { sendMessage: sendGroupMessage, selectedGroup, groupSocket } = useGroupStore(); // Access group chat
+    const { authUser } = useAuthStore(); 
 
     const handleEmojiSelect = (emoji) => {
         setText((prev) => prev + emoji.native);
     };
 
-    const handleImageChange = (e) => {
+    const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
+        const fileType = file.type;
+        let messageType = "text"; 
+
+        if (fileType.startsWith("image/")) messageType = "image";
+        else if (fileType.startsWith("video/")) messageType = "video";
+        else if (fileType.startsWith("audio/")) messageType = "audio";
+        else messageType = "document"; 
+
+        if (file.size > 10 * 1024 * 1024) {
+            toast.error("File size must be less than 10MB");
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error("Image size must be less than 5MB");
-            return;
-        }
-
-        setImagePreview(URL.createObjectURL(file));
-        setSelectedImage(file);
+        setFilePreview(URL.createObjectURL(file));
+        setSelectedFile(file);
+        setFileType(messageType);
     };
 
-    const removeImage = () => {
-        setImagePreview(null);
-        setSelectedImage(null);
+    const removeFile = () => {
+        setFilePreview(null);
+        setSelectedFile(null);
+        setFileType(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // Typing Indicator Logic
     useEffect(() => {
-        if (!socket || !selectedUser) return;
-        
+        if (!socket && !groupSocket) return;
+        if (!selectedUser && !selectedGroup) return;
+
         const typingTimeout = setTimeout(() => {
             if (text.trim().length) {
                 if (!isTyping) {
-                    socket.emit('startTyping', selectedUser._id);
+                    if (selectedUser) socket.emit("startTyping", selectedUser._id);
+                    if (selectedGroup) groupSocket.emit("startTyping", selectedGroup._id);
                     setIsTyping(true);
                 }
             } else {
                 if (isTyping) {
-                    socket.emit('stopTyping', selectedUser._id);
+                    if (selectedUser) socket.emit("stopTyping", selectedUser._id);
+                    if (selectedGroup) groupSocket.emit("stopTyping", selectedGroup._id);
                     setIsTyping(false);
                 }
             }
         }, 1000);
 
         return () => clearTimeout(typingTimeout);
-    }, [text, isTyping, socket, selectedUser]); 
+    }, [text, isTyping, socket, groupSocket, selectedUser, selectedGroup]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!text.trim() && !selectedImage) return;
+        if (!text.trim() && !selectedFile) return;
 
         try {
             const formData = new FormData();
+            formData.append("messageType", fileType || "text");
 
             if (text.trim()) {
                 formData.append("text", text.trim());
             }
 
-            if (selectedImage) {
-                formData.append("file", selectedImage);
+            if (selectedFile) {
+                formData.append("file", selectedFile);
             }
-   
-            await sendMessage(formData);
 
-            // Reset fields
+            // Check if it's a group message or single-user message
+            if (selectedGroup) {
+                await sendGroupMessage(formData); 
+                if (groupSocket) groupSocket.emit("stopTyping", selectedGroup._id);
+            } else if (selectedUser) {
+                await sendUserMessage(formData);
+                if (socket) socket.emit("stopTyping", selectedUser._id);
+            }
+
             setText("");
-            removeImage();
+            removeFile();
             setShowEmojiPicker(false);
-
-            if (socket && selectedUser) {
-                socket.emit('stopTyping', selectedUser._id);
-            }
         } catch (error) {
             console.error("Failed to send message", error);
             toast.error("Failed to send message. Please try again.");
         }
     };
 
-    // Close Emoji Picker on Outside Click
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (showEmojiPicker && !e.target.closest('.emoji-picker')) {
+            if (showEmojiPicker && !e.target.closest(".emoji-picker")) {
                 setShowEmojiPicker(false);
             }
         };
@@ -113,16 +125,34 @@ const MessageInput = () => {
 
     return (
         <div className="p-4 w-full relative">
-            {imagePreview && (
+            {filePreview && (
                 <div className="mb-3 flex items-center gap-2">
                     <div className="relative">
-                        <img 
-                            src={imagePreview}
-                            alt="Preview"
-                            className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
-                        />
+                        {fileType === "image" ? (
+                            <img
+                                src={filePreview}
+                                alt="Preview"
+                                className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+                            />
+                        ) : fileType === "video" ? (
+                            <video
+                                src={filePreview}
+                                className="w-20 h-20 rounded-lg border border-zinc-700"
+                                controls
+                            />
+                        ) : fileType === "audio" ? (
+                            <audio controls className="w-full">
+                                <source src={filePreview} type={selectedFile.type} />
+                                Your browser does not support the audio element.
+                            </audio>
+                        ) : (
+                            <div className="w-20 h-20 flex items-center justify-center rounded-lg border border-zinc-700 bg-gray-800 text-white">
+                                <FileText size={30} />
+                            </div>
+                        )}
+
                         <button
-                            onClick={removeImage}
+                            onClick={removeFile}
                             className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
                             type="button"
                         >
@@ -154,17 +184,19 @@ const MessageInput = () => {
                         onChange={(e) => setText(e.target.value)}
                     />
 
-                    <input 
+                    <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
                         className="hidden"
                         ref={fileInputRef}
-                        onChange={handleImageChange}
+                        onChange={handleFileChange}
                     />
                     <button
                         type="button"
                         aria-label="Attach file"
-                        className={`btn btn-circle p-2 h-10 w-10 sm:h-12 sm:w-12 ${imagePreview ? "text-emerald-500" : "text-zinc-400"} flex items-center justify-center`}
+                        className={`btn btn-circle p-2 h-10 w-10 sm:h-12 sm:w-12 ${
+                            filePreview ? "text-emerald-500" : "text-zinc-400"
+                        } flex items-center justify-center`}
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <Paperclip size={20} />

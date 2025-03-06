@@ -1,3 +1,4 @@
+// Backend: socket.js
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
@@ -12,11 +13,10 @@ const io = new Server(server, {
   },
 });
 
-// Store online users
+// Store online users & group members
 const userSocketMap = {}; // { userId: socketId }
 const groupMembersMap = {}; // { groupId: [userIds] }
 
-// Function to get a receiver's socket ID
 export function getReciverSocketId(userId) {
   return userSocketMap[userId] || null;
 }
@@ -26,17 +26,14 @@ io.on("connection", (socket) => {
 
   const userId = socket.handshake.query.userId;
   if (userId) {
-    userSocketMap[userId] = socket.id; // Always update socket ID when user connects
+    userSocketMap[userId] = socket.id;
     console.log(`User registered: ${userId} -> ${socket.id}`);
-  } else {
-    console.log("User ID is missing, unable to map socket to user.");
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
   }
 
-  // Emit updated list of online users
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-  // User joins a group chat
+  // Handle joining a group
   socket.on("joinGroup", ({ groupId, userId }) => {
+    if (!groupId || !userId) return;
     socket.join(groupId);
     console.log(`User ${userId} joined group: ${groupId}`);
 
@@ -46,56 +43,62 @@ io.on("connection", (socket) => {
     if (!groupMembersMap[groupId].includes(userId)) {
       groupMembersMap[groupId].push(userId);
     }
-
     io.to(groupId).emit("groupUsers", groupMembersMap[groupId]);
   });
 
-  // User leaves a group chat
+  // Handle adding a new member to a group
+  socket.on("addGroupMember", ({ groupId, newMemberId }) => {
+    if (!groupId || !newMemberId) return;
+    if (!groupMembersMap[groupId].includes(newMemberId)) {
+      groupMembersMap[groupId].push(newMemberId);
+      io.to(groupId).emit("groupUsers", groupMembersMap[groupId]);
+    }
+  });
+
+  // Handle leaving a group
   socket.on("leaveGroup", ({ groupId, userId }) => {
+    if (!groupId || !userId) return;
     socket.leave(groupId);
     console.log(`User ${userId} left group: ${groupId}`);
-
+    
     if (groupMembersMap[groupId]) {
       groupMembersMap[groupId] = groupMembersMap[groupId].filter((id) => id !== userId);
       io.to(groupId).emit("groupUsers", groupMembersMap[groupId]);
     }
   });
 
-  // Handle message sending (Supports both 1-to-1 & Group Chat)
+  // Handle sending messages (1-to-1 and group chat)
   socket.on("sendMessage", (messageData) => {
-    console.log("Message received from client:", messageData);
-
-    const { receiverId, groupId } = messageData;
-
+    if (!messageData) return;
+    const { receiverId, groupId, senderId } = messageData;
+    
     if (groupId) {
-      // ✅ Send message to all members in the group
-      io.to(groupId).emit("newMessage", messageData);
-      console.log(`Group message sent to group ${groupId}`);
+      io.to(groupId).emit("newGroupMessage", messageData);
+      io.to(socket.id).emit("messageDelivered", { groupId, senderId });
     } else if (receiverId) {
-      // ✅ Send message only to a single recipient
-      const receiverSocketId = userSocketMap[receiverId];
-
+      const receiverSocketId = getReceiverSocketId(receiverId);
       if (receiverSocketId) {
         io.to(receiverSocketId).emit("newMessage", messageData);
-        console.log(`Message sent to receiver: ${receiverId}`);
       }
     }
-
-    // Send the message back to the sender as well
     io.to(socket.id).emit("newMessage", messageData);
   });
 
-  // Handle user disconnection
+  // Handle message read status
+  socket.on("readGroupMessage", ({ groupId, userId }) => {
+    io.to(groupId).emit("messageRead", { groupId, userId });
+  });
+
+  // Handle disconnection
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
-
     if (userId) {
-      delete userSocketMap[userId]; // Remove user from online list
-      console.log(`User ${userId} removed from online list.`);
+      delete userSocketMap[userId];
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
     }
-
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
+
+
 
 export { io, app, server, userSocketMap };

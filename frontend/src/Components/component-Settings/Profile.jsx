@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { MdPhotoCamera } from "react-icons/md";
-
+import { useAuthStore } from '../../store/useAuthStore';
 const Profile = () => {
+
+  const { authUser } = useAuthStore();
   // Default values (adjust as desired)
-  const [displayName, setDisplayName] = useState("! NotYourDaddy");
+  const [displayName, setDisplayName] = useState( authUser?.username );
   const [pronouns, setPronouns] = useState("master__22 > YourDaddy");
   const [avatarFile, setAvatarFile] = useState(null);
   // Remove bannerColor and use bannerFile for banner image
   const [bannerFile, setBannerFile] = useState(null);
-  const [aboutMe, setAboutMe] = useState('dm for nitro , boosters , members , decorations , otts');
+  const [aboutMe, setAboutMe] = useState(authUser?.bio || "");
   
   // Handlers for avatar
   const handleAvatarChange = (e) => {
@@ -155,9 +157,11 @@ const Profile = () => {
                 className="w-full h-full object-cover rounded-md"
               />
             ) : (
-              <div className="w-full h-full bg-gray-700 flex items-center justify-center rounded-md">
-                <span className="text-gray-400">No Banner</span>
-              </div>
+              <img
+                src={authUser?.bannerImage || "default-image-url"}
+                alt="Banner Preview"
+                className="w-full h-full object-cover rounded-md"
+              />
             )}
             {/* Avatar preview */}
             <div className="absolute -bottom-8 left-4 flex items-center">
@@ -169,7 +173,11 @@ const Profile = () => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <MdPhotoCamera className="text-4xl text-gray-400 m-auto mt-2" />
+                  <img
+                    src={authUser?.profileImage || "default-image-url"}
+                    alt="Avatar Preview"
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </div>
             </div>

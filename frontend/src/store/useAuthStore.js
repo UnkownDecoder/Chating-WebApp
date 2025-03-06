@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
+import { useGroupStore } from "./useGroupStore";
 
 const BASE_URL = "http://localhost:5172/api/";
 const SOCKET_URL = "http://localhost:5172";
@@ -15,9 +16,7 @@ export const useAuthStore = create((set, get) => ({
     onlineUsers: [],
     socket: null,
     friends: [],
-    groups: [],
     isFetchingFriends: false,
-    isFetchingGroups: false,
 
     checkAuth: async () => {
         try {
@@ -50,7 +49,9 @@ export const useAuthStore = create((set, get) => ({
             localStorage.setItem('email', res.data.email);
             localStorage.setItem('profileImage', res.data.profileImage || '');
             get().connectSocket();
-            get().fetchGroups(); // Fetch groups after authentication
+            
+            // ✅ Fetch groups from `useGroupStore.js`
+            useGroupStore.getState().fetchGroups();
         } catch (error) {
             console.log("Error checking auth:", error);
             set({ authUser: null });
@@ -64,12 +65,17 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
+
     signUp: async (data) => {
         set({ isSigningUp: true });
 
         try {
             await axiosInstance.post("/auth/signup", data);
+            
             toast.success("Registration successful. Please login.");
+
+
+            return { success: true };
         } catch ( error) {
             toast.error(error.response?.data?.message || "Signup failed");
         } finally {
@@ -98,7 +104,10 @@ export const useAuthStore = create((set, get) => ({
                     _id: res.data._id,
                     username: res.data.username,
                     email: res.data.email,
-                    profileImage: res.data.profileImage
+                    profileImage: res.data.profileImage,
+                    phone: res.data.phone,
+                    bannerImage: res.data.bannerImage,
+                    bio: res.data.bio
                 }
             });
 
@@ -107,7 +116,9 @@ export const useAuthStore = create((set, get) => ({
 
             toast.success("Login successful");
             get().connectSocket();
-            get().fetchGroups(); // Fetch groups after login
+           // ✅ Correct way to call fetchGroups() from useGroupStore
+              useGroupStore.getState().fetchGroups();
+
 
             return { success: true };
         } catch (error) {
@@ -263,44 +274,5 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    fetchGroups: async () => {
-        const userId = localStorage.getItem("userId");
-        if (!userId) {
-            console.error("No user ID found");
-            return;
-        }
-
-        set({ isFetchingGroups: true });
-        try {
-            
-            const res = await axiosInstance.get(`/groups/my-groups/${userId}`);
-
-            console.log("Fetched groups data:", res.data);
-            if (res.data) {
-                set({ groups: res.data || [] });
-            } else {
-                console.error("No groups data received");
-                set({ groups: [] });
-            }
-        } catch (error) {
-            console.error("Error fetching groups:", error);
-            toast.error(error.response?.data?.message || "Failed to fetch groups");
-            set({ groups: [] });
-        } finally {
-            set({ isFetchingGroups: false });
-        }
-    },
-
-    createGroup: async (groupData) => {
-        try {
-            const res = await axiosInstance.post("/groups/create", groupData);
-            set((state) => ({
-                groups: [...state.groups, res.data.group]
-            }));
-            toast.success("Group created successfully");
-        } catch (error) {
-            console.error("Error creating group:", error);
-            toast.error(error.response?.data?.message || "Failed to create group");
-        }
-    }
+    
 }));

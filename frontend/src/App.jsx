@@ -13,6 +13,7 @@ import Settings from "./Components/Settings";
 import Developers from "./pages/Developers";
 import AdminDashboard from "./pages/AdminDashboard";
 import { useThemeStore } from "./store/useThemeStore";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { theme } = useThemeStore();
@@ -31,6 +32,8 @@ const AppLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900">
+     {/* Global Toaster for Notifications */}
+     <Toaster position="top-center" reverseOrder={false} />
       {/* Conditionally render Header */}
       {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
 

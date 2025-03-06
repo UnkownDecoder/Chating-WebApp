@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-
+import { useAuthStore } from '../../store/useAuthStore';
 const Account = () => {
   const [activeTab, setActiveTab] = useState('Security');
-
+const { authUser } = useAuthStore();
   // Dummy masked info (replace with your real data/masking logic)
-  const displayName = '!! ViShAl $';
+  const displayName = authUser?.username || 'Guest';
   const username = 'he/him';
-  const maskedEmail = '***********@gmail.com';
-  const maskedPhone = '*****8775';
+  const maskedEmail = authUser?.email || '*****@gmail.com';
+  const maskedPhone = authUser?.phone;
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);

@@ -6,11 +6,11 @@ import axios from 'axios';
 import SettingsSidebar from './SettingSidebar';
 import Appearance from '../Components/component-Settings/Appearance'; 
 import Account from '../Components/component-Settings/Account'; 
-import Profile from '../Components/component-Settings/profile'; // NEW: Import the Profile component
+import Profile from '../Components/component-Settings/Profile'; // NEW: Import the Profile component
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { logout, authUser, updateProfile, setAuthUser } = useAuthStore();
+  const { logout, authUser, updateProfile, } = useAuthStore();
   const [activeSection, setActiveSection] = useState('My Account');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('Default Theme');
@@ -39,7 +39,6 @@ const Settings = () => {
       setEmail(userData.email);
       setPhoneNumber(userData.phoneNumber);
       setProfilePhoto(userData.profileImage);
-      setAuthUser(userData);
     } catch (error) {
       console.error('Error fetching user details:', error);
     }

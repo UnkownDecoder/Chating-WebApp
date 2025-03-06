@@ -1,12 +1,33 @@
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
-  senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  receiverId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: false },
-  groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", default: null }, // ✅ Make it optional
-  text: { type: String, required: false },
-  image: { type: String, required: false },
-  createdAt: { type: Date, default: Date.now }
+  senderId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User", 
+    required: true 
+  },
+  receiverId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User", 
+    required: true 
+  },
+  messageType: {
+    type: String,
+    enum: ["text", "image", "video", "document", "audio"],
+    default: "text"
+  },
+  text: { 
+    type: String, 
+    required: function() { return this.messageType === "text"; } 
+  },
+  mediaUrl: { 
+    type: String, 
+    default: null 
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  }
 });
 
 export default mongoose.model("Message", messageSchema);

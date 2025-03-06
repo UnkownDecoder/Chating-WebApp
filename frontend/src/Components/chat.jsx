@@ -9,10 +9,12 @@ import Sidebar from './Sidebar';
 import ChatHeader from './ChatHeader';
 import NoChatSelected from "./NoChatSelected";
 import ChatContainer from "./ChatContainer";
+import { useGroupStore } from "../store/useGroupStore";
 
 const Chat = () => {
   const { socket, connectSocket } = useAuthStore();
   const { selectedUser, setSelectedUser, getUsers, users } = useChatStore();
+  const { selectedGroup, setSelectedGroup } = useGroupStore();
 
   const [message, setMessage] = useState('');
   const [typing, setTyping] = useState('');
@@ -85,6 +87,7 @@ const Chat = () => {
   };
 
   const handleFriendSelect = (friendId, friendName) => {
+   
     setSelectedFriendId(friendId);
     setSelectedFriendName(friendName);
     const selectedFriend = users.find((friend) => friend._id === friendId);
@@ -94,6 +97,7 @@ const Chat = () => {
         username: selectedFriend.username,
         profileImage: selectedFriend.profileImage || "/images/default-profile.png",
       });
+      
     }
   };
 
@@ -115,7 +119,7 @@ const Chat = () => {
             setFriendRequestMessage={setFriendRequestMessage}
           />
         ) : (
-          (!selectedUser ? <NoChatSelected /> : <ChatContainer /> )
+          (!selectedUser && !selectedGroup ? <NoChatSelected /> : <ChatContainer /> )
         )}
       </div>
     </div>

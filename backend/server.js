@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import bodyParser from "body-parser";
-import multer from "multer";
+import upload from "./library/multer.js";
 import { connectDB } from "./library/db.js";
 import authRoutes from "./routers/authRoutes.js";
 import reviewRouter from "./routers/reviewRouter.js";
@@ -42,28 +42,6 @@ app.options("*", (req, res) => {
 // **✅ Body Parser for URL encoded data**
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
-// **✅ Multer Configuration**
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Folder for uploaded files
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (!file.mimetype.startsWith("image/")) {
-    return cb(new Error("Invalid file type. Only images are allowed."), false);
-  }
-  cb(null, true);
-};
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 50 * 1024 * 1024 }, // **Max file size: 50MB**
-});
 
 // **✅ API Routes**
 app.use("/api/auth", upload.fields([{ name: "profileImage" }, { name: "bannerImage" }]), authRoutes);
