@@ -1,6 +1,6 @@
 // authRoutes.js
 import express from "express";
-import multer from "multer";
+import upload from "../library/multer.js";
 import {login , logout , signup } from "../controllers/authController.js"; // Ensure correct path and correct import
 import { ProtectRoute } from "../middleware/auth.middleware.js";
 import { updateProfile } from "../controllers/authController.js"
@@ -8,9 +8,7 @@ import { checkAuth } from "../controllers/authController.js"
 
 const router = express.Router();
 
-// Multer setup for file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+
 
 
 

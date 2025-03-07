@@ -103,9 +103,9 @@ const Register = () => {
    const response = await signUp(formDataToSend);
    if (response?.success) {
     setSuccessMessage("Registration successful!");
-    setShowMessage(true);
+   
     setTimeout(() => {
-      setShowMessage(false);
+      
       navigate('/login');
     }, 3000);
   }

@@ -24,12 +24,15 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
-    "image/png", "image/jpeg", "image/jpg", "image/gif",
-    "video/mp4", "video/mkv", "video/webm",
-    "audio/mp3", "audio/wav", "audio/mpeg",
-    "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  ];
-  
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    'video/mp4', 'video/mpeg', 'video/quicktime',
+    'audio/mpeg', 'audio/wav', 'audio/ogg',
+    'application/pdf', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xls, .xlsx
+    'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .ppt, .pptx
+    'text/plain' // .txt files
+];
   if (!allowedMimeTypes.includes(file.mimetype)) {
     return cb(new Error("Invalid file type. Only images, videos, audio, and documents are allowed."), false);
   }
