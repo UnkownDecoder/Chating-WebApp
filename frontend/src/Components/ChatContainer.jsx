@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { X } from "lucide-react"; // Close button icon
 import GroupChatHeader from "./groups/GroupHeader.jsx";
 
+
 const ChatContainer = () => {
   const {
     messages,
@@ -19,6 +20,7 @@ const ChatContainer = () => {
     unsubscribeFromMessages,
     setMessages,
     sendMessage: sendMessageToServer,
+    typingUsers
   } = useChatStore();
 
   const {
@@ -29,15 +31,18 @@ const ChatContainer = () => {
     subscribeToGroupMessages,
     unsubscribeFromGroupMessages,
     setGroupMessages,
+    typingUsers: groupTypingUsers
+    
   } = useGroupStore();
 
+  
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
   const [fullMedia, setFullMedia] = useState(null); // For viewing media full-screen
 
   // Check if it's a group chat or single user chat
   const isGroupChat = Boolean(selectedGroup?._id);
-  console.log("isGroupChat:", isGroupChat);
+
   const selectedChat = isGroupChat ? selectedGroup : selectedUser;
 
   useEffect(() => {
@@ -72,7 +77,7 @@ const ChatContainer = () => {
     }
   }, [messages, groupMessages]);
 
-  console.log("Messages:", groupMessages);
+
 
   const handleSendMessage = async (text, messageType, mediaUrl = null) => {
     if (!text && !mediaUrl) return;
@@ -193,7 +198,27 @@ const ChatContainer = () => {
             </div>
           );
         })}
+         
+      {/* Typing Indicator */}
+{(Object.keys(typingUsers).length > 0 || Object.keys(groupTypingUsers).length > 0) && (
+  <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg w-fit">
+    <span className="text-sm text-gray-300">
+      {Object.keys(groupTypingUsers).length > 0
+        ? `${Object.values(groupTypingUsers).join(", ")} ${Object.keys(groupTypingUsers).length > 1 ? "are" : "is"} typing...`
+        : `${Object.values(typingUsers).join(", ")} ${Object.keys(typingUsers).length > 1 ? "are" : "is"} typing...`}
+        
+    </span>
+    <div className="flex space-x-1">
+      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+    </div>
+  </div>
+)}
+
         <div ref={messageEndRef} />
+       
+         
       </div>
 
       {/* Full-Screen Media Preview */}

@@ -17,7 +17,7 @@ const io = new Server(server, {
 const userSocketMap = {}; // { userId: socketId }
 const groupMembersMap = {}; // { groupId: [userIds] }
 
-export function getReciverSocketId(userId) {
+export function getReceiverSocketId(userId) {
   return userSocketMap[userId] || null;
 }
 
@@ -54,6 +54,49 @@ io.on("connection", (socket) => {
       io.to(groupId).emit("groupUsers", groupMembersMap[groupId]);
     }
   });
+
+// Typing handlers for both group and 1-to-1 chats
+socket.on("startTyping", (data) => {
+    console.log('startTyping event received:', data);
+    if (data.groupId) {
+        // Group chat typing
+        console.log(`Broadcasting typing to group ${data.groupId}`);
+        socket.to(data.groupId).emit("userTyping", { 
+            userId: data.userId, 
+            username: data.username 
+        });
+    } else if (data.userId) {
+        // 1-to-1 chat typing
+        console.log(`Sending typing to user ${data.userId}`);
+        const receiverSocketId = getReceiverSocketId(data.userId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("userTyping", { 
+                userId: socket.handshake.query.userId,
+                username: data.username 
+            });
+        } else {
+            console.log('Receiver socket not found');
+        }
+    }
+});
+
+socket.on("stopTyping", (data) => {
+    if (data.groupId) {
+        // Group chat stop typing
+        socket.to(data.groupId).emit("userStoppedTyping", { 
+            userId: data.userId 
+        });
+    } else if (data.userId) {
+        // 1-to-1 chat stop typing
+        const receiverSocketId = getReceiverSocketId(data.userId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("userStoppedTyping", { 
+                userId: socket.handshake.query.userId 
+            });
+        }
+    }
+});
+  
 
   // Handle leaving a group
   socket.on("leaveGroup", ({ groupId, userId }) => {

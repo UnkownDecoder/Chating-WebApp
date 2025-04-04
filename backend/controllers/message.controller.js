@@ -2,7 +2,7 @@ import User from "../models/userModel.js";
 import Message from "../models/message.model.js";
 
 import cloudinary from "../library/cloudinary.js";
-import { getReciverSocketId, io } from "../library/socket.utils.js";
+import { getReceiverSocketId, io } from "../library/socket.utils.js";
 
 
 export const getUsersForSideBar = async (req, res) => {
@@ -81,7 +81,7 @@ export const getUsersForSideBar = async (req, res) => {
             const responseMessage = await newMessage.populate("senderId", "username profileImage");
     
             // Socket.io Emit Message to receiver only
-            const receiverSocketId = getReciverSocketId(receiverId);
+            const receiverSocketId = getReceiverSocketId(receiverId);
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("newMessage", responseMessage);
             }

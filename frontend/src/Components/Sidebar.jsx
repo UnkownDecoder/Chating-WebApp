@@ -65,6 +65,7 @@ const Sidebar = ({ toggleFriendsView }) => {
   // Convert friends object/array to a usable array
   const filteredFriends = useMemo(() => {
     if (!friends) return [];
+    console.log("fri:",friends);
     const friendsArray = Array.isArray(friends) ? friends : friends.friends || [];
     return friendsArray.filter((friend) => !!friend);
   }, [friends]);
@@ -77,6 +78,7 @@ const Sidebar = ({ toggleFriendsView }) => {
   // Removed the old My Account handler
 
   const handleFriendClick = (friend) => {
+  
     if (selectedUser?._id === friend._id) {
       setSelectedUser(null);
       setSelectedGroup(null);
