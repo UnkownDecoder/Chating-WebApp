@@ -26,8 +26,8 @@ const SideProfile = () => {
      useEffect(() => {
         if(selectedUser){
             setDisplayName(selectedUser?.username);
-            setPronouns("master__22 > YourDaddy");
-            setAvatarFile(selectedUser?.profileImage);
+            setPronouns(selectedUser?.pronouns || "master__22 > YourBadshah");
+            setAvatarFile(selectedUser?.profileImage );
             setBannerFile(selectedUser?.bannerImage);
             setAboutMe(selectedUser?.bio);
          }
@@ -35,14 +35,28 @@ const SideProfile = () => {
             setDisplayName(selectedGroup?.name);
             setPronouns("master__22 > YourDaddy");
             setAvatarFile(selectedGroup?.profileImage);
-            setBannerFile(null);
+            setBannerFile(selectedGroup?.profileImage);
             setAboutMe("hello");
          }
       }, [selectedUser, selectedGroup]);
+      
+
+      const handleFriendClick = (member) => {
+  
+        if (selectedUser?._id === member._id) {
+          setSelectedUser(null);
+          setSelectedGroup(null);
+        } else {
+          setSelectedUser(member);
+          setSelectedGroup(null);
+        }
+        setIsSidebarVisible(false);
+        document.getElementById("sidebar")?.classList.add("hidden");
+      };
    
   return (
     <div className="md:w-1/1 bg-gray-900 p-4 rounded-lg min-h-full">
-      <h3 className="text-xl font-bold mb-4">PREVIEW</h3>
+      <h3 className="text-xl font-bold mb-4">PROFILE</h3>
 
       {/* Banner area */}
       <div className="w-full h-20 mb-6 rounded-md relative">
@@ -102,10 +116,22 @@ const SideProfile = () => {
     {/* Group Members */}
     <div>
       <p className="text-sm text-gray-400 font-semibold mb-1">Group Members:</p>
-      <ul className="list-disc list-inside text-gray-300 text-sm">
+      <ul className=" lmt-2 flex-1 overflow-y-auto ">
         {selectedGroup?.members?.length > 0 ? (
           selectedGroup.members.map((member, index) => (
-            <li key={index}>{member.username}</li>
+            <li key={index}   className={`flex items-center p-2 rounded-lg mb-2 cursor-pointer 
+                    ${
+                      selectedUser?._id === member._id
+                        ? "bg-blue-600"
+                        : "bg-gray-800 hover:bg-gray-700"
+                    }`}
+                  onClick={() => handleFriendClick(member)}  > <img
+                    src={member.profileImage || "default-image-url"}
+                    alt={member.username}
+                    className="w-8 h-8 rounded-full mr-3"
+                  />
+                   <span className="text-white">{member.username}</span>
+                   </li>
           ))
         ) : (
           <li>No members found.</li>

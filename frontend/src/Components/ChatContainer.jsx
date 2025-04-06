@@ -9,7 +9,6 @@ import { toast } from "react-hot-toast";
 import { X } from "lucide-react"; // Close button icon
 import GroupChatHeader from "./groups/GroupHeader.jsx";
 
-
 const ChatContainer = () => {
   const {
     messages,
@@ -24,21 +23,20 @@ const ChatContainer = () => {
   } = useChatStore();
 
   const {
-    messages:groupMessages,
-    getMessages:getGroupMessages,
+    messages: groupMessages,
+    getMessages: getGroupMessages,
     selectedGroup,
     sendMessage: sendGroupMessage,
     subscribeToGroupMessages,
     unsubscribeFromGroupMessages,
     setGroupMessages,
     typingUsers: groupTypingUsers
-    
   } = useGroupStore();
 
-  
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
   const [fullMedia, setFullMedia] = useState(null); // For viewing media full-screen
+  const messagesContainerRef = useRef(null);
 
   // Check if it's a group chat or single user chat
   const isGroupChat = Boolean(selectedGroup?._id);
@@ -76,8 +74,6 @@ const ChatContainer = () => {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, groupMessages]);
-
-
 
   const handleSendMessage = async (text, messageType, mediaUrl = null) => {
     if (!text && !mediaUrl) return;
@@ -122,19 +118,24 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
-     
-      {(isGroupChat ? <GroupChatHeader/> :  <ChatHeader title={selectedChat.name || selectedChat.username} />)}
-      <div className="flex-1 p-4 space-y-2">
+    <div className="flex-1 flex flex-col h-full">
+      {/* Fixed Header */}
+      <div className="sticky top-0 z-10  bg-gray-900">
+        {isGroupChat ? <GroupChatHeader /> : <ChatHeader title={selectedChat.name || selectedChat.username} />}
+      </div>
+
+      {/* Scrollable Messages */}
+      <div 
+        className="flex-1 overflow-y-auto p-4 space-y-2"
+        ref={messagesContainerRef}
+      >
         {(isGroupChat ? groupMessages : messages).map((message, index) => {
-          
-          
           const isSender = isGroupChat ? message.sender._id === authUser._id : message.senderId._id === authUser._id;
 
           const senderProfileImage = isSender
             ? authUser?.profileImage || "/images/default-profile.png"
             : isGroupChat
-            ?  message.sender.profileImage || "/images/default-profile.png"
+            ? message.sender.profileImage || "/images/default-profile.png"
             : selectedUser?.profileImage || "/images/default-profile.png";
 
           return (
@@ -143,19 +144,19 @@ const ChatContainer = () => {
               className={`chat ${isSender ? "chat-end" : "chat-start"}`}
               ref={index === (isGroupChat ? groupMessages : messages).length - 1 ? messageEndRef : null}
             >
-             <div className="chat-image avatar">
+              <div className="chat-image avatar">
                 <div className="size-10 rounded-full border">
                   <img src={senderProfileImage} alt="Profile Pic" />
                 </div>
               </div>
               <div className="chat-header">
-              {!isSender && (
-                  <span className="text-sm p-2 font-semibold">{isGroupChat ? message.sender.username : message.senderId.username}</span>
+                {!isSender && (
+                  <span className="text-sm p-2 font-semibold">
+                    {isGroupChat ? message.sender.username : message.senderId.username}
+                  </span>
                 )}
-               
               </div>
               <div className="chat-bubble">
-                {/* Image Preview */}
                 {message.messageType === "image" && (
                   <img
                     src={message.mediaUrl}
@@ -164,22 +165,16 @@ const ChatContainer = () => {
                     onClick={() => setFullMedia({ type: "image", url: message.mediaUrl })}
                   />
                 )}
-
-                {/* Video Preview */}
                 {message.messageType === "video" && (
                   <video controls className="w-40 rounded-md cursor-pointer">
                     <source src={message.mediaUrl} type="video/mp4" />
                   </video>
                 )}
-
-                {/* Audio Preview */}
                 {message.messageType === "audio" && (
                   <audio controls>
                     <source src={message.mediaUrl} type="audio/mp3" />
                   </audio>
                 )}
-
-                {/* Document Link */}
                 {message.messageType === "document" && (
                   <a
                     href={message.mediaUrl}
@@ -190,35 +185,35 @@ const ChatContainer = () => {
                     View Document
                   </a>
                 )}
-
-                {/* Text Message */}
                 {isGroupChat ? message.messageType && <p>{message.message}</p> : message.text && <p>{message.text}</p>}
                 <time className="text-xs opacity-50">{formatMessageTime(message.createdAt)}</time>
               </div>
             </div>
           );
         })}
-         
-      {/* Typing Indicator */}
-{(Object.keys(typingUsers).length > 0 || Object.keys(groupTypingUsers).length > 0) && (
-  <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg w-fit">
-    <span className="text-sm text-gray-300">
-      {Object.keys(groupTypingUsers).length > 0
-        ? `${Object.values(groupTypingUsers).join(", ")} ${Object.keys(groupTypingUsers).length > 1 ? "are" : "is"} typing...`
-        : `${Object.values(typingUsers).join(", ")} ${Object.keys(typingUsers).length > 1 ? "are" : "is"} typing...`}
-        
-    </span>
-    <div className="flex space-x-1">
-      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
-    </div>
-  </div>
-)}
+
+        {/* Typing Indicator */}
+        {(Object.keys(typingUsers).length > 0 || Object.keys(groupTypingUsers).length > 0) && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg w-fit">
+            <span className="text-sm text-gray-300">
+              {Object.keys(groupTypingUsers).length > 0
+                ? `${Object.values(groupTypingUsers).join(", ")} ${Object.keys(groupTypingUsers).length > 1 ? "are" : "is"} typing...`
+                : `${Object.values(typingUsers).join(", ")} ${Object.keys(typingUsers).length > 1 ? "are" : "is"} typing...`}
+            </span>
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+            </div>
+          </div>
+        )}
 
         <div ref={messageEndRef} />
-       
-         
+      </div>
+
+      {/* Fixed Message Input */}
+      <div className="sticky bottom-0  bg-gray-900 p-4">
+        <MessageInput onSendMessage={handleSendMessage} isGroup={isGroupChat} />
       </div>
 
       {/* Full-Screen Media Preview */}
@@ -239,9 +234,6 @@ const ChatContainer = () => {
           )}
         </div>
       )}
-
-      {/* Message Input */}
-      <MessageInput onSendMessage={handleSendMessage} isGroup={isGroupChat} />
     </div>
   );
 };

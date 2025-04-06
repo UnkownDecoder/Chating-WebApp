@@ -3,10 +3,10 @@ import { MdPhotoCamera } from "react-icons/md";
 import { useAuthStore } from '../../store/useAuthStore';
 const Profile = () => {
 
-  const { authUser } = useAuthStore();
+  const { authUser , updateProfile } = useAuthStore();
   // Default values (adjust as desired)
   const [displayName, setDisplayName] = useState( authUser?.username );
-  const [pronouns, setPronouns] = useState("master__22 > YourDaddy");
+  const [pronouns, setPronouns] = useState(authUser?.pronouns);
   const [avatarFile, setAvatarFile] = useState(null);
   // Remove bannerColor and use bannerFile for banner image
   const [bannerFile, setBannerFile] = useState(null);
@@ -37,9 +37,27 @@ const Profile = () => {
   };
 
   // Handler for save button
-  const handleSave = () => {
-    // Implement saving functionality here (e.g., API call)
-    alert("Profile saved!");
+  const handleSave = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('username', displayName);
+      formData.append('pronouns', pronouns);
+      formData.append('bio', aboutMe);
+      
+      if (avatarFile) {
+        formData.append('profileImage', avatarFile);
+      }
+      if (bannerFile) {
+        formData.append('bannerImage', bannerFile);
+      }
+
+      // Call updateProfile with FormData
+      await updateProfile(formData);
+      // alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    }
   };
 
   return (

@@ -47,7 +47,7 @@ export const createGroup =  async (req, res) => {
   export const getGroups =  async (req, res) => {
     try {
       const groups = await Group.find({ members: req.user._id })
-        .populate("members", "username profileImage");
+        .populate("members", "username profileImage bio");
       
       res.json(groups);
     } catch (error) {

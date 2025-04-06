@@ -127,9 +127,11 @@ const Chat = () => {
         )}
        
       </div>
+     
       <div className="w-1/4 bg-gray-800 p-4 border-l-2 border-gray-700">
         <SideProfile user={user} />
     </div>
+      
     </div>
   );
 };
