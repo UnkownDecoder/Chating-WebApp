@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, ArrowLeft, Phone, Video } from "lucide-react";
+import { X, ArrowLeft, Phone, Video, User } from "lucide-react"; // Import the User icon
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -72,7 +72,7 @@ const ChatHeader = () => {
           <ArrowLeft className="h-6 w-6" />
         </button>
 
-        {/* Desktop: Call, Video Call, and Close Buttons */}
+        {/* Desktop: Call, Video Call, Person, and Close Buttons */}
         <div className="hidden md:flex items-center gap-2">
           <button
             onClick={handleCall}
@@ -85,6 +85,11 @@ const ChatHeader = () => {
             className="btn btn-circle flex items-center justify-center"
           >
             <Video className="h-6 w-6" />
+          </button>
+          <button
+            className="btn btn-circle flex items-center justify-center"
+          >
+            <User className="h-6 w-6" />
           </button>
           <button
             onClick={handleClose}

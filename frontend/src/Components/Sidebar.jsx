@@ -181,7 +181,7 @@ const Sidebar = ({ toggleFriendsView }) => {
                 <img
                   src={authUser.profileImage}
                   alt="User"
-                  className="rounded-full w-10 h-10"
+                  className="rounded-full w-10 h-10 object-cover"
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-gray-700"></div>
