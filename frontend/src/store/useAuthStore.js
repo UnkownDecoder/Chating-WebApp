@@ -107,9 +107,11 @@ export const useAuthStore = create((set, get) => ({
                     profileImage: res.data.profileImage,
                     phone: res.data.phone,
                     bannerImage: res.data.bannerImage,
-                    bio: res.data.bio
+                    bio: res.data.bio,
+                    pronouns: res.data.pronouns
                 }
             });
+            console.log("Login response:", res.data);
 
             // Set cookie with token
             document.cookie = `token=${res.data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
@@ -154,32 +156,71 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    updateProfile: async (data) => {
+    updateProfile: async (formData) => {
         set({ isUpdatingProfile: true });
 
         try {
-            const res = await axiosInstance.put("/auth/update-profile", data);
-            set({ 
-                authUser: {
-                    _id: res.data._id,
-                    username: res.data.username,
-                    email: res.data.email,
-                    profileImage: res.data.profileImage
+            const res = await axiosInstance.put("/auth/update-profile", formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
             });
-            localStorage.setItem('userId', res.data._id);
-            localStorage.setItem('username', res.data.username);
-            localStorage.setItem('email', res.data.email);
-            localStorage.setItem('profileImage', res.data.profileImage || '');
+            
+            const updatedUser = res.data.user;
+            set({ 
+                authUser: {
+                    ...get().authUser,
+                    username: updatedUser.username,
+                    profileImage: updatedUser.profileImage,
+                    bannerImage: updatedUser.bannerImage,
+                    bio: updatedUser.bio,
+                    pronouns: updatedUser.pronouns
+                }
+            });
+
+            // Update localStorage
+            localStorage.setItem('username', updatedUser.username);
+            if (updatedUser.profileImage) {
+                localStorage.setItem('profileImage', updatedUser.profileImage);
+            }
+            if (updatedUser.bannerImage) {
+                localStorage.setItem('bannerImage', updatedUser.bannerImage);
+            }
 
             toast.success("Profile updated successfully");
+            return res.data;
         } catch (error) {
             toast.error(error.response?.data?.message || "Profile update failed");
+            throw error;
         } finally {
             set({ isUpdatingProfile: false });
         }
     },
 
+
+     changePassword : async ( oldPassword, newPassword) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+
+        try {
+            console.log("Changing password...");
+          const res = await axiosInstance.put('auth/change-password', {
+            oldPassword,
+            newPassword,
+          }, {
+            headers: {
+              Authorization: `Bearer ${token}`, // if using JWT
+            }
+          });
+      
+          alert(res.data.message);
+        } catch (err) {
+          alert(err.response?.data?.message || "Error updating password.");
+        }
+      },
+      
     connectSocket: () => {
         const { authUser } = get();
         

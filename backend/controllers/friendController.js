@@ -129,7 +129,7 @@ export const getFriendsList = async (req, res) => {
   
       // Find friends using their `id` (not `_id`)
       const friends = await User.find({ _id: { $in: user.friends } })
-        .select('id username profileImage');
+        .select('id username profileImage bannerImage bio pronouns');
   
       res.json({ friends });
     } catch (error) {

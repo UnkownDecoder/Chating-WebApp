@@ -11,8 +11,8 @@ export const useGroupStore = create((set, get) => ({
     isMessagesLoading: false,
     currentPage: 1,
     hasMoreMessages: true,
-    groups: [],
     isFetchingGroups: false,
+    typingUsers: {},
 
 
 
@@ -63,14 +63,6 @@ export const useGroupStore = create((set, get) => ({
         }
     },
 
-    getGroups: async () => {
-        try {
-            const res = await axiosInstance.get("/groups");
-            set({ groups: res.data });
-        } catch (error) {
-            toast.error("Failed to load groups.");
-        }
-    },
 
     getMessages: async (groupId, page = 1) => {
         set({ isMessagesLoading: true });
@@ -120,20 +112,72 @@ export const useGroupStore = create((set, get) => ({
     subscribeToGroupMessages: () => {
         const { selectedGroup } = get();
         if (!selectedGroup) return;
+        
         const { socket, connectSocket } = useAuthStore.getState();
-    
-        if (socket) {
-          socket.off("newGroupMessage");
-          socket.on("newGroupMessage", (newMessage) => {
-            if (newMessage?.groupId === selectedGroup.id) {
-              set((state) => ({ messages: [...state.messages, newMessage] }));
-            }
-          });
-          socket.emit("joinGroup", { groupId: selectedGroup.id, userId: localStorage.getItem("userId") });
-        } else {
-          connectSocket();
+        const userId = localStorage.getItem("userId");
+        const username = localStorage.getItem("username");
+
+        if (!socket || !socket.connected) {
+            connectSocket();
+            return;
         }
-      },
+
+        // Clear previous listeners
+        socket.off("newGroupMessage");
+        socket.off("userTyping");
+        socket.off("userStoppedTyping");
+
+        // Message handler
+        socket.on("newGroupMessage", (newMessage) => {
+            if (newMessage?.groupId === selectedGroup._id) {
+                set((state) => ({ messages: [...state.messages, newMessage] }));
+            }
+        });
+
+        // Typing handlers
+        const handleUserTyping = ({ userId, username }) => {
+            console.log('Received typing event for user:', userId);
+            set((state) => {
+                // Only update if this is a new typing user
+                if (!state.typingUsers[userId]) {
+                    return { 
+                        typingUsers: { ...state.typingUsers, [userId]: username }
+                    };
+                }
+                return state;
+            });
+        };
+
+        const handleUserStoppedTyping = ({ userId }) => {
+            console.log('Received stop typing event for user:', userId);
+            set((state) => {
+                if (state.typingUsers[userId]) {
+                    const updated = {...state.typingUsers};
+                    delete updated[userId];
+                    return { typingUsers: updated };
+                }
+                return state;
+            });
+        };
+
+        socket.on("userTyping", handleUserTyping);
+        socket.on("userStoppedTyping", handleUserStoppedTyping);
+
+        // Join group room
+        socket.emit("joinGroup", { 
+            groupId: selectedGroup._id, 
+            userId,
+            username
+        });
+
+        // Return cleanup function
+        return () => {
+            socket.off("newGroupMessage");
+            socket.off("userTyping", handleUserTyping);
+            socket.off("userStoppedTyping", handleUserStoppedTyping);
+        };
+    },
+    
     
       unsubscribeFromGroupMessages: () => {
         const { socket } = useAuthStore.getState();

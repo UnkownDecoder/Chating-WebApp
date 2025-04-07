@@ -16,9 +16,9 @@ const MessageInput = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const fileInputRef = useRef(null);
 
-    const { sendMessage: sendUserMessage, selectedUser, socket } = useChatStore();
+    const { sendMessage: sendUserMessage, selectedUser } = useChatStore();
     const { sendMessage: sendGroupMessage, selectedGroup, groupSocket } = useGroupStore(); // Access group chat
-    const { authUser } = useAuthStore(); 
+    const { authUser , socket} = useAuthStore(); 
 
     const handleEmojiSelect = (emoji) => {
         setText((prev) => prev + emoji.native);
@@ -54,27 +54,54 @@ const MessageInput = () => {
     };
 
     useEffect(() => {
-        if (!socket && !groupSocket) return;
+        if (!socket) return;
+      
         if (!selectedUser && !selectedGroup) return;
+     
 
         const typingTimeout = setTimeout(() => {
             if (text.trim().length) {
+                console.log("hello");
                 if (!isTyping) {
-                    if (selectedUser) socket.emit("startTyping", selectedUser._id);
-                    if (selectedGroup) groupSocket.emit("startTyping", selectedGroup._id);
+                    console.log('Emitting startTyping event');
+                    if (selectedUser) {
+                        console.log('To user:', selectedUser._id);
+                        socket.emit("startTyping", { 
+                            userId: selectedUser._id,
+                            username: authUser.username
+                        });
+                    }
+                    if (selectedGroup) {
+                        console.log('To group:', selectedGroup._id);
+                        socket.emit("startTyping", { 
+                            groupId: selectedGroup._id, 
+                            userId: authUser._id, 
+                            username: authUser.username 
+                        });
+                    }
                     setIsTyping(true);
                 }
             } else {
                 if (isTyping) {
-                    if (selectedUser) socket.emit("stopTyping", selectedUser._id);
-                    if (selectedGroup) groupSocket.emit("stopTyping", selectedGroup._id);
+                    console.log('Emitting stopTyping event');
+                    if (selectedUser) {
+                        socket.emit("stopTyping", { 
+                            userId: selectedUser._id 
+                        });
+                    }
+                    if (selectedGroup) {
+                        socket.emit("stopTyping", { 
+                            groupId: selectedGroup._id, 
+                            userId: authUser._id 
+                        });
+                    }
                     setIsTyping(false);
                 }
             }
-        }, 1000);
+        }, 100);
 
         return () => clearTimeout(typingTimeout);
-    }, [text, isTyping, socket, groupSocket, selectedUser, selectedGroup]);
+    }, [text, isTyping, socket, selectedUser, selectedGroup, authUser]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -95,7 +122,7 @@ const MessageInput = () => {
             // Check if it's a group message or single-user message
             if (selectedGroup) {
                 await sendGroupMessage(formData); 
-                if (groupSocket) groupSocket.emit("stopTyping", selectedGroup._id);
+                if (socket) socket.emit("stopTyping", selectedGroup._id);
             } else if (selectedUser) {
                 await sendUserMessage(formData);
                 if (socket) socket.emit("stopTyping", selectedUser._id);

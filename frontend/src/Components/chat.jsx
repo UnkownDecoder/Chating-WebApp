@@ -9,6 +9,7 @@ import Sidebar from './Sidebar';
 import ChatHeader from './ChatHeader';
 import NoChatSelected from "./NoChatSelected";
 import ChatContainer from "./ChatContainer";
+import SideProfile from "./component-Settings/sidePRofile";
 import { useGroupStore } from "../store/useGroupStore";
 
 const Chat = () => {
@@ -119,9 +120,19 @@ const Chat = () => {
             setFriendRequestMessage={setFriendRequestMessage}
           />
         ) : (
-          (!selectedUser && !selectedGroup ? <NoChatSelected /> : <ChatContainer /> )
+         
+          (!selectedUser && !selectedGroup ? <NoChatSelected /> : <ChatContainer />  )
+         
+         
         )}
+       
       </div>
+     {selectedUser && (
+      <div className="w-1/4 bg-gray-800 p-4 border-l-2 border-gray-700">
+        <SideProfile user={user} />
+    </div>
+     )}
+      
     </div>
   );
 };

@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
   bio:{
     type: String
   },
+  pronouns:{
+    type: String,
+    default:null
+  },
   password:{ 
       type: String, 
       required: true,

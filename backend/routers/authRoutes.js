@@ -4,7 +4,7 @@ import upload from "../library/multer.js";
 import {login , logout , signup } from "../controllers/authController.js"; // Ensure correct path and correct import
 import { ProtectRoute } from "../middleware/auth.middleware.js";
 import { updateProfile } from "../controllers/authController.js"
-import { checkAuth } from "../controllers/authController.js"
+import { checkAuth ,changePassword } from "../controllers/authController.js"
 
 const router = express.Router();
 
@@ -19,5 +19,6 @@ router.post("/logout", logout);
 
 router.put("/update-profile", ProtectRoute ,updateProfile);
 router.get("/check", ProtectRoute , checkAuth);
+router.put('/change-password', ProtectRoute, changePassword);
 
 export default router;

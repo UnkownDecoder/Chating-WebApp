@@ -13,6 +13,7 @@ export const useChatStore = create((set, get) => ({
     isMessagesLoading: false,
     currentPage: 1,
     hasMoreMessages: true,
+    typingUsers: {}, // State to track typing users
 
     setMessages: (newMessages) => {
         set({ messages: newMessages }); // ✅ Messages overwrite kar raha hai
@@ -113,6 +114,8 @@ export const useChatStore = create((set, get) => ({
     
         if (socket) {
             socket.off("newMessage"); // ✅ Remove previous listeners
+            socket.off("userTyping");
+            socket.off("userStoppedTyping");
         }
     
         const handleNewMessage = (newMessage) => {
@@ -125,6 +128,22 @@ export const useChatStore = create((set, get) => ({
                 }));
             }
         };
+
+        const handleUserTyping = ({ userId, username }) => {
+            console.log("user:", userId, username )
+            set((state) => ({
+                typingUsers: { ...state.typingUsers, [userId]: username },
+            }));
+        };
+
+        const handleUserStoppedTyping = ({ userId }) => {
+            set((state) => {
+                const updatedTypingUsers = { ...state.typingUsers };
+                delete updatedTypingUsers[userId];
+                return { typingUsers: updatedTypingUsers };
+            });
+        };
+
         const handleSocketError = (error) => {
             console.error("Socket error:", error);
             setTimeout(() => {
@@ -141,10 +160,14 @@ export const useChatStore = create((set, get) => ({
                     const roomId = selectedUser._id;
                     socket.emit('joinChat', roomId);
                     socket.on("newMessage", handleNewMessage);
+                    socket.on("userTyping", handleUserTyping);
+                    socket.on("userStoppedTyping", handleUserStoppedTyping);
                     socket.on("error", handleSocketError);
                 });
             } else {
                 socket.on("newMessage", handleNewMessage);
+                socket.on("userTyping", handleUserTyping);
+                socket.on("userStoppedTyping", handleUserStoppedTyping);
                 socket.on("error", handleSocketError);
                 const roomId = selectedUser._id;
                 socket.emit('joinChat', roomId);
@@ -157,6 +180,8 @@ export const useChatStore = create((set, get) => ({
             unsubscribeFromMessages: () => {
                 if (socket) {
                     socket.off("newMessage", handleNewMessage);
+                    socket.off("userTyping", handleUserTyping);
+                    socket.off("userStoppedTyping", handleUserStoppedTyping);
                     socket.off("error", handleSocketError);
                     const roomId = selectedUser._id;
                     socket.emit('leaveChat', roomId);

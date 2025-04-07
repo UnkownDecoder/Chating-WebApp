@@ -66,6 +66,7 @@ export const signup = async (req, res) => {
       email: newUser.email,
       profileImage: newUser.profileImage,
       bannerImage: newUser.bannerImage,
+      pronouns: newUser.pronouns,
     });
   } catch (error) {
     console.error('Error registering user:', error.message);
@@ -113,6 +114,7 @@ export const login = async (req , res) => {
       bannerImage: user.bannerImage || null,
       token: token,
       bio: user.bio,
+      pronouns: user.pronouns,
     })
     
 
@@ -140,32 +142,64 @@ export const logout =  (req , res) => {
 
 // Controller function for user profile photo & banner update
 export const updateProfile = async (req, res) => {
+  console.log("update profile",req.body);
+  console.log("update profile",req.files);
   try {
     const userId = req.user._id;
+    const { username, bio, pronouns } = req.body;
 
+    // Get current user to check for existing images
+    const currentUser = await User.findById(userId);
+    
     // Handle file uploads
-    const profileImage = req.files?.profileImage
-      ? await cloudinary.uploader.upload(req.files.profileImage[0].path)
-      : null;
+    let profileImageUrl, bannerImageUrl;
+    
+    if (req.files?.profileImage) {
+      // Delete old profile image if exists
+      if (currentUser.profileImage) {
+        const publicId = currentUser.profileImage.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      }
+      const uploadResult = await cloudinary.uploader.upload(req.files.profileImage[0].path);
+      profileImageUrl = uploadResult.secure_url;
+    }
 
-    const bannerImage = req.files?.bannerImage
-      ? await cloudinary.uploader.upload(req.files.bannerImage[0].path)
-      : null;
+    if (req.files?.bannerImage) {
+      // Delete old banner image if exists
+      if (currentUser.bannerImage) {
+        const publicId = currentUser.bannerImage.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      }
+      const uploadResult = await cloudinary.uploader.upload(req.files.bannerImage[0].path);
+      bannerImageUrl = uploadResult.secure_url;
+    }
 
-    // Update the user with new images
+    // Update user data
+    const updateData = {
+      ...(username && { username }),
+      ...(bio && { bio }),
+      ...(pronouns && { pronouns }),
+      ...(profileImageUrl && { profileImage: profileImageUrl }),
+      ...(bannerImageUrl && { bannerImage: bannerImageUrl }),
+    };
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      {
-        ...(profileImage && { profileImage: profileImage.secure_url }),
-        ...(bannerImage && { bannerImage: bannerImage.secure_url }),
-      },
+      updateData,
       { new: true }
     );
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      success: true,
+      user: updatedUser
+    });
   } catch (error) {
-    console.error("Error updating profile:", error.message);
-    res.status(500).json({ message: "Error updating profile", error });
+    console.error("Error updating profile:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to update profile",
+      error: error.message 
+    });
   }
 };
 
@@ -178,5 +212,44 @@ export const checkAuth = (req, res) => {
     console.log('Error checking user:', error.message);
     res.status(500).json({ message: 'Internal server error' });
 
+  }
+};
+
+
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { oldPassword, newPassword } = req.body;
+
+    // Validate input
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Both old and new passwords are required.' });
+    }
+
+    // Fetch the user
+    const user = await User.findById(userId).select('+password'); // assuming password is select: false in schema
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    // Check old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Incorrect old password.' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update password.' });
   }
 };
