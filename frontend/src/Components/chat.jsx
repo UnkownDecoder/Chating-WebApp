@@ -121,8 +121,8 @@ const Chat = () => {
           />
         ) : (
          
-          (!selectedUser && !selectedGroup ? <NoChatSelected /> : <ChatContainer />  )
-         
+        
+           (!selectedUser && !selectedGroup ? <NoChatSelected /> : <ChatContainer />  )
          
         )}
        
@@ -132,6 +132,13 @@ const Chat = () => {
         <SideProfile user={user} />
     </div>
      )}
+
+     {selectedGroup && (
+      <div className="w-1/4 bg-gray-800 p-4 border-l-2 border-gray-700">
+        <SideProfile user={user} />
+    </div>
+     )}
+   
       
     </div>
   );
