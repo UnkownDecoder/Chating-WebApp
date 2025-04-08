@@ -10,6 +10,7 @@ import reviewRouter from "./routers/reviewRouter.js";
 import forgetPas from "./routers/forgetPassword.js";
 import userInfo from "./routers/friendRoutes.js";
 import messageRoutes from "./routers/message.routes.js";
+import adminPanel from "./routers/adminRoute.js"
 import { app, server } from "./library/socket.utils.js";
 import groupRoutes from "./routers/groupRoutes.js";
 
@@ -48,6 +49,9 @@ app.use("/api/reviews", reviewRouter);
 app.use("/api/forget", forgetPas);
 app.use("/api/user", userInfo);
 app.use("/api/groups", groupRoutes);
+
+//admin api
+app.use("/api/admin", adminPanel);
 
 // **✅ Apply `multer` only to `messageRoutes` where needed**
 app.use("/api/messages", messageRoutes);
